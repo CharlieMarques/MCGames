@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Detalle del Juego - PlayHub</title>
+    <!-- Bootstrap 5.3 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Iconos de Bootstrap (Crucial para las estrellitas) -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <!-- Tu CSS Personalizado -->
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+    <!-- BARRA DE NAVEGACIÓN -->
+ <div id="navbar-container"></div>
+
+    <!-- BANNER DEL JUEGO (Se llenará con JS) -->
+ <section id="game-hero" class="position-relative d-flex align-items-center py-5" style="min-height: 45vh; background-color: var(--bg-secondary); overflow: hidden;">
+        
+        <!-- Fondo gigante (Se verá borroso y oscuro) -->
+        <div id="hero-background" class="position-absolute w-100 h-100" style="top: 0; left: 0; filter: blur(12px); opacity: 0.3; transform: scale(1.1);"></div>
+        <!-- Degradado para fusionar el banner con el fondo de tu web -->
+        <div class="position-absolute w-100 h-100" style="top: 0; left: 0; background: linear-gradient(0deg, var(--bg-primary) 0%, transparent 100%);"></div>
+
+        <div class="container position-relative z-1">
+            <div class="row align-items-center gap-4 gap-md-0">
+                <!-- Póster del juego (Nítido y sin recortar) -->
+                <div class="col-5 col-sm-4 col-md-3 d-none d-sm-block">
+                    <img id="game-poster" src="" alt="Portada" class="img-fluid rounded shadow-lg border border-secondary" style="max-height: 380px; object-fit: cover;">
+                </div>
+                
+                <!-- Textos e Información -->
+                <div class="col-12 col-sm-8 col-md-9 text-light ps-md-4">
+                    <h1 id="game-title" class="display-4 fw-bold text-white mb-2 text-truncate">Cargando...</h1>
+                    <p id="game-release" class="text-secondary fs-5 mb-4"></p>
+                    <button id="btn-add-library" class="btn btn-accent btn-lg px-4 fw-bold shadow">
+                        <i class="bi bi-plus-lg"></i> Agregar a mi Biblioteca
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!-- CONTENIDO PRINCIPAL -->
+    <main class="container my-5">
+        <div class="row g-5">
+            <!-- COLUMNA IZQUIERDA: Info del Juego -->
+            <div class="col-lg-7">
+                <h3 class="fw-bold text-white mb-3">Sobre este juego</h3>
+                <p id="game-description" class="text-light" style="line-height: 1.8;">
+                    <!-- JS inyectará la descripción aquí -->
+                    Cargando información del juego...
+                </p>
+                
+                <div class="d-flex gap-2 mt-4" id="game-genres">
+                    <!-- JS inyectará tags de géneros aquí -->
+                </div>
+            </div>
+
+            <!-- COLUMNA DERECHA: Reseñas y Calificaciones -->
+            <div class="col-lg-5">
+                <div class="card border-secondary mb-4" style="background-color: var(--bg-secondary);">
+                    <div class="card-body">
+                        <h4 class="card-title text-white fw-bold"><i class="bi bi-star-half text-warning"></i> Deja tu reseña</h4>
+                        
+                        <!-- Formulario de Reseña (Solo visible si está logueado) -->
+                        <div id="review-auth-message" class="alert bg-dark text-secondary border-secondary mt-3 d-none">
+                            Debes <a href="login.html" class="text-accent text-decoration-none">iniciar sesión</a> para dejar una reseña.
+                        </div>
+
+                        <form id="review-form" class="mt-3">
+                            <!-- Sistema interactivo de estrellas -->
+                            <div class="mb-3 d-flex align-items-center gap-2">
+                                <span class="text-light">Calificación:</span>
+                                <div id="star-rating" class="fs-4 text-secondary" style="cursor: pointer;">
+                                    <i class="bi bi-star star-btn" data-value="1"></i>
+                                    <i class="bi bi-star star-btn" data-value="2"></i>
+                                    <i class="bi bi-star star-btn" data-value="3"></i>
+                                    <i class="bi bi-star star-btn" data-value="4"></i>
+                                    <i class="bi bi-star star-btn" data-value="5"></i>
+                                </div>
+                                <input type="hidden" id="rating-value" value="0">
+                            </div>
+                            
+                            <div class="mb-3">
+                                <textarea class="form-control bg-dark border-secondary text-light" id="review-text" rows="3" placeholder="¿Qué te pareció el juego?" required></textarea>
+                            </div>
+                            <button type="submit" class="btn btn-outline-accent w-100">Publicar Reseña</button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Lista de Reseñas Anteriores -->
+                <h5 class="fw-bold text-white mb-3">Comunidad</h5>
+                <div id="reviews-list" class="d-flex flex-column gap-3">
+                    <!-- JS inyectará las reviews aquí -->
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="../js/config/api.js"></script>
+    <script src="../js/navbar.js"></script>
+    <script src="../js/game-detail.js"></script>
+</body>
+</html>

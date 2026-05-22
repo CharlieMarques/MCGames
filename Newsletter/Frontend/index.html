@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PlayHub - Tu tienda de videojuegos</title>
+    <!-- Bootstrap 5.3 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Iconos de Bootstrap (Para el buscador y logos) -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <!-- Tu CSS Personalizado -->
+    <link rel="stylesheet" href="./css/style.css">
+</head>
+
+<body>
+    <div id="navbar-container"></div>
+
+    <!-- CONTENIDO PRINCIPAL -->
+    <main class="container my-5">
+
+ <section id="hero-carousel" class="carousel slide mb-5" data-bs-ride="carousel">
+    <div class="carousel-indicators" id="carousel-indicators"></div>
+    <div class="carousel-inner" id="carousel-inner">
+        <div class="carousel-item active">
+            <div class="hero-banner" style="background-image: url('https://images.unsplash.com/photo-1605901309584-818e25960b8f?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80');">
+                <div class="hero-overlay"></div>
+                <div class="hero-content text-center w-100">
+                    <h2 class="text-white">Cargando últimos lanzamientos...</h2>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <button class="carousel-control-prev" type="button" data-bs-target="#hero-carousel" data-bs-slide="prev">
+        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+        <span class="visually-hidden">Anterior</span>
+    </button>
+    <button class="carousel-control-next" type="button" data-bs-target="#hero-carousel" data-bs-slide="next">
+        <span class="carousel-control-next-icon" aria-hidden="true"></span>
+        <span class="visually-hidden">Siguiente</span>
+    </button>
+</section>
+
+        <!-- SECCIÓN DE JUEGOS DESTACADOS -->
+        <section class="mb-5">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2 class="h4 fw-bold m-0 text-white">Destacados</h2>
+                <a href="#" class="btn btn-sm btn-outline-secondary text-light">Ver todos</a>
+            </div>
+
+            <!-- GRILLA DE JUEGOS (El ID es vital para conectar con JavaScript) -->
+            <div class="row g-4" id="games-grid">
+                <!-- JavaScript inyectará las tarjetas aquí -->
+            </div>
+        </section>
+    </main>
+
+    <!-- Bootstrap Bundle JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="./js/config/api.js""></script>
+    <script src="./js/navbar.js"></script>
+    <script src="./js/index.js"></script>
+</body>
+
+</html>

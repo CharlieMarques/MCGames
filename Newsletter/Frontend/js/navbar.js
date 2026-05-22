@@ -1,0 +1,189 @@
+document.addEventListener('DOMContentLoaded', () => {
+    renderizarNavbar();
+    verificarEstadoAuth();
+    const urlParams = new URLSearchParams(window.location.search);
+    const busquedaDesdeNavbar = urlParams.get('search');
+
+    if (busquedaDesdeNavbar) {
+        currentSearchTerm = busquedaDesdeNavbar;
+        
+        // Si dejaste el buscador grandote en el HTML del catálogo, 
+        // le escribimos la palabra para que el usuario vea qué buscó
+        const searchInput = document.getElementById('search-input');
+        if (searchInput) {
+            searchInput.value = busquedaDesdeNavbar;
+        }
+    }
+
+    // Cargamos el catálogo (usará el currentSearchTerm si vino algo en la URL)
+    cargarCatalogo(1);
+
+    // Listener para el buscador local (si decidiste dejarlo en el catálogo)
+    const searchInput = document.getElementById('search-input');
+    if (searchInput) {
+        searchInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                buscarJuegos();
+            }
+        });
+    }
+});
+document.addEventListener('submit', (e) => {
+    // Verificamos si el formulario que hizo el 'submit' es nuestro buscador
+    if (e.target && e.target.id === 'global-search-form') {
+        e.preventDefault(); // Evitamos que la página recargue por defecto
+        
+        const termino = document.getElementById('global-search-input').value.trim();
+        
+        if (termino) {
+            // Detectamos si estamos en index.html o dentro de la carpeta pages/
+            const enRaiz = window.location.pathname.endsWith('/') || window.location.pathname.endsWith('index.html');
+            const rutaCatalogo = enRaiz ? './pages/catalogo.html' : './catalogo.html';
+            
+            // Redirigimos al catálogo enviando la palabra buscada por la URL
+            window.location.href = `${rutaCatalogo}?search=${encodeURIComponent(termino)}`;
+        }
+    }
+});
+
+function renderizarNavbar() {
+    // Detectamos si estamos en la raíz (index.html) o dentro de la carpeta /pages/
+    const enRaiz = window.location.pathname.endsWith('/') || window.location.pathname.endsWith('index.html');
+    const prefijo = enRaiz ? './pages/' : './';
+    const linkInicio = enRaiz ? '#' : '../index.html';
+
+    const navbarContainer = document.getElementById('navbar-container');
+    
+    if (!navbarContainer) return; // Si la página no tiene el contenedor, no hacemos nada
+
+    navbarContainer.innerHTML = `
+        <nav class="navbar navbar-expand-lg navbar-dark bg-dark border-bottom border-secondary sticky-top">
+            <div class="container">
+                <!-- Logo -->
+                <a class="navbar-brand d-flex align-items-center gap-2" href="${linkInicio}">
+                    <i class="bi bi-play-fill fs-3" style="color: var(--accent-secondary);"></i>
+                    <span class="fw-bold">PLAYHUB</span>
+                </a>
+
+                <!-- Botón móvil -->
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <!-- Enlaces -->
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <ul class="navbar-nav me-auto">
+                        <li class="nav-item">
+                            <a class="nav-link active" href="${prefijo}catalogo.html">Tienda</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="${prefijo}biblioteca.html">Mi Biblioteca</a>
+                        </li>
+                    </ul>
+                    <form class="d-flex mx-auto my-2 my-lg-0" id="global-search-form" style="max-width: 400px; width: 100%;">
+                <div class="input-group">
+                    <input class="form-control bg-dark border-secondary text-light" type="search" id="global-search-input" placeholder="Buscar juegos..." required>
+                    <button class="btn btn-outline-accent" type="submit">
+                        <i class="bi bi-search"></i>
+                    </button>
+                </div>
+            </form>
+
+                    <!-- Botones de Autenticación (Se controlan con JS) -->
+                    <div class="d-flex gap-3 align-items-center">
+                        <!-- ESTADO INVITADO -->
+                        <div id="nav-guest" class="d-flex gap-2">
+                            <a href="${prefijo}login.html" class="btn btn-outline-accent">Iniciar Sesión</a>
+                            <a href="${prefijo}registro.html" class="btn btn-accent">Registrarse</a>
+                        </div>
+
+                        <!-- ESTADO USUARIO -->
+                        <div id="nav-user" class="d-flex gap-3 align-items-center d-none">
+                                        <!-- Enlace al perfil -->
+                        <a href="${prefijo}perfil.html" class="text-light text-decoration-none fw-bold text-truncate"
+                            style="max-width: 150px;">
+                            <i class="bi bi-person-circle text-accent me-1"></i>
+                            <span id="nav-username"></span>
+                        </a>
+                            <button id="btnLogout" class="btn btn-sm btn-outline-danger" title="Cerrar Sesión">
+                                <i class="bi bi-box-arrow-right"></i> Salir
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </nav>
+    `;
+}
+
+// MUDAMOS LA LÓGICA DE SESIÓN AQUÍ (Para que sea global)
+function verificarEstadoAuth() {
+ const token = localStorage.getItem('jwtToken');
+    const navGuest = document.getElementById('nav-guest');
+    const navUser = document.getElementById('nav-user');
+    const navUsername = document.getElementById('nav-username');
+    const btnLogout = document.getElementById('btnLogout');
+
+    // Si alguno de los elementos no existe en el DOM, salimos para evitar errores
+    if (!navGuest || !navUser || !navUsername) return;
+
+    if (token) {
+        let nombreReal = localStorage.getItem('username') || 'Gamer'; 
+        let esAdmin = false; // 💡 1. Preparamos la variable
+
+        try {
+            const payloadBase64 = token.split('.')[1];
+            const payloadJson = atob(payloadBase64); 
+            const tokenData = JSON.parse(payloadJson);
+            nombreReal = tokenData.sub || nombreReal; 
+
+            // 💡 2. Leemos los roles directamente del Token de C#
+            const roles = tokenData['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'];
+            if (Array.isArray(roles)) {
+                esAdmin = roles.includes('Admin') || roles.includes('Moderador');
+            } else {
+                esAdmin = (roles === 'Admin' || roles === 'Moderador');
+            }
+        } catch (error) {
+            console.error("No se pudo decodificar el token", error);
+        }
+
+        navGuest.classList.add('d-none');
+        navUser.classList.remove('d-none');
+        navUsername.textContent = nombreReal; 
+
+        // 💡 3. MAGIA: Si es Admin, le agregamos el botón especial al Navbar
+        if (esAdmin && !document.getElementById('nav-admin-link')) {
+            // Detectamos si estamos en la raíz para que la ruta no se rompa
+            const enRaiz = window.location.pathname.endsWith('/') || window.location.pathname.endsWith('index.html');
+            const prefijo = enRaiz ? './pages/' : './';
+            
+            // Buscamos la lista donde están "Tienda" y "Mi Biblioteca"
+            const ulNavbar = document.querySelector('.navbar-nav');
+            if (ulNavbar) {
+                ulNavbar.innerHTML += `
+                    <li class="nav-item ms-lg-3" id="nav-admin-link">
+                        <a class="nav-link text-warning fw-bold" href="${prefijo}admin-dashboard.html">
+                            <i class="bi bi-shield-lock-fill"></i> Panel Admin
+                        </a>
+                    </li>
+                `;
+            }
+        }
+
+        // Botón Logout Global
+        if (btnLogout) {
+            btnLogout.addEventListener('click', () => {
+                localStorage.removeItem('jwtToken');
+                localStorage.removeItem('username');
+                
+                // Al cerrar sesión, si no estamos en el index, lo mandamos al index por seguridad
+                const enRaiz = window.location.pathname.endsWith('/') || window.location.pathname.endsWith('index.html');
+                window.location.href = enRaiz ? window.location.href : '../index.html'; 
+            });
+        }
+    } else {
+        navGuest.classList.remove('d-none');
+        navUser.classList.add('d-none');
+    }
+}

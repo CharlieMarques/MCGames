@@ -1,0 +1,6 @@
+@Newsletter_HostAddress = http://localhost:5219
+
+GET {{Newsletter_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

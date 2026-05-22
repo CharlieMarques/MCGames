@@ -1,0 +1,94 @@
+:root {
+  --bg-primary: #0F172A;
+  --bg-secondary: #1E293B;
+  --text-primary: #E5E7EB;
+  --text-secondary: #9CA3AF;
+  --accent-primary: #3B82F6;
+  --accent-secondary: #8B5CF6;
+  --success: #22C55E;
+  --danger: #EF4444;
+}
+
+body {
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
+/* Sobrescribir colores de Navbar de Bootstrap */
+.navbar {
+    background-color: var(--bg-secondary) !important;
+}
+
+/* Botones personalizados con tus colores Accent */
+.btn-accent {
+    background-color: var(--accent-primary);
+    color: white;
+    border: none;
+}
+.btn-accent:hover {
+    background-color: #2563EB; /* Un tono ligeramente más oscuro */
+    color: white;
+}
+
+.btn-outline-accent {
+    border-color: var(--accent-secondary);
+    color: var(--accent-secondary);
+}
+.btn-outline-accent:hover {
+    background-color: var(--accent-secondary);
+    color: white;
+}
+
+/* Estilos del Banner Principal (Hero) */
+.hero-banner {
+    height: 60vh;
+    background-size: cover;
+    background-position: center;
+    border-radius: 1rem;
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    align-items: flex-end;
+    padding: 3rem;
+}
+.hero-overlay {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    /* Degradado oscuro para que el texto resalte sobre la imagen */
+    background: linear-gradient(to right, rgba(15, 23, 42, 0.95) 0%, rgba(15, 23, 42, 0.1) 100%);
+    z-index: 1;
+}
+.hero-content {
+    position: relative;
+    z-index: 2;
+    max-width: 600px;
+}
+
+/* Tarjetas de Juegos (Cards) */
+.game-card {
+    background-color: var(--bg-secondary);
+    border: none;
+    border-radius: 0.75rem;
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s;
+    overflow: hidden;
+}
+.game-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.4);
+}
+.game-card .card-img-top {
+    height: 200px;
+    object-fit: cover;
+}
+.price-tag {
+    color: var(--success);
+    font-weight: bold;
+}
+.discount-badge {
+    background-color: var(--success);
+    color: white;
+    font-size: 0.8rem;
+    padding: 0.2rem 0.5rem;
+    border-radius: 0.25rem;
+}
