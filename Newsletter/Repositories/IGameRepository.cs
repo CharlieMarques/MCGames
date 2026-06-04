@@ -10,5 +10,6 @@ namespace Newsletter.Repositories
         void Update(Game game);
         void Delete(Game game);
         Task SaveChangesAsync();
+        Task<IEnumerable<Game>> GetMultiPlatformGamesAsync();
     }
 }

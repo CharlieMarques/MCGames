@@ -1,5 +1,7 @@
-﻿using Newsletter.DTOs.Genres;
+﻿using Newsletter.DTOs.Category;
+using Newsletter.DTOs.Genres;
 using Newsletter.DTOs.Platforms;
+using Newsletter.Models;
 
 namespace Newsletter.DTOs.Games
 {
@@ -13,7 +15,11 @@ namespace Newsletter.DTOs.Games
         public bool State {  get; set; }
         public decimal Price { get; set; }
         public bool OnOffer { get; set; }
+        public decimal DiscountPercentage { get; set; }
+        public decimal FinalPrice { get; set; }
+        public int? SteamAppId { get; set; }
 
+        public List<CategoryReadDto>? Categories { get; set; }
         public List<GenreDto>? Genres { get; set; }
         public List<PlatformDto>? Platforms {  get; set; }
 

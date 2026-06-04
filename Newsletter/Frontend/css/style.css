@@ -92,3 +92,19 @@ body {
     padding: 0.2rem 0.5rem;
     border-radius: 0.25rem;
 }
+.badge.bg-success {
+    background-color: #4c6b22 !important; /* El verde oscuro característico de ofertas */
+    color: #a4d007;
+    font-weight: bold;
+    padding: 4px 6px;
+    border-radius: 3px;
+}
+
+/* Efecto de elevación en las tarjetas en oferta */
+.game-card {
+    transition: transform 0.2s ease, border-color 0.2s ease;
+}
+.game-card:hover {
+    transform: translateY(-5px);
+    border-color: var(--accent-primary) !important;
+}

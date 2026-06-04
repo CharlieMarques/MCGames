@@ -102,13 +102,15 @@ namespace Newsletter.Services
                 return (true, string.Empty, new List<ReadGamesLibraryDto>());
             }
             var games = await _libraryRepository.GetQueryableGameLibraries()
+                .Include(gl => gl.Game)
                 .Where(gl => gl.LibraryId == library.Id && gl.State == true)
                 .Select(gl => new ReadGamesLibraryDto
                 {
                     GameId = gl.GameId,
                     Name = gl.Game != null ? gl.Game.Name : "Juego Desconocido",
                     ReleaseDate = gl.AddedDate,
-                    GameCoverUrl = gl.Game != null ? gl.Game.GameCoverUrl : string.Empty
+                    GameCoverUrl = gl.Game != null ? gl.Game.GameCoverUrl : string.Empty,
+                    SteamAppId = gl.Game != null ? gl.Game.SteamAppId : 0
                 })
                 .ToListAsync();
             return (true, string.Empty, games);

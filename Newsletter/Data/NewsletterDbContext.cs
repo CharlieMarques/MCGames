@@ -15,6 +15,7 @@ namespace Newsletter.Data
         public DbSet<Library> Libraries { get; set; }
         public DbSet<GamePlatform> GamePlatforms { get; set; }
         public DbSet<GameGenre> GameGenre { get; set; }
+        public virtual DbSet<GameInEpic> GamesInEpic { get; set; }
 
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -54,6 +55,21 @@ namespace Newsletter.Data
                 .HasOne (gg => gg.Genre)
                 .WithMany(g => g.GameGenre)
                 .HasForeignKey (gg => gg.GenreId);
+
+            modelBuilder.Entity<GameCategory>()
+                .HasKey(gc => new { gc.GameId, gc.CategoryId });
+
+            modelBuilder.Entity<GameInEpic>(entity =>
+            {                
+                entity.ToTable("GamesInEpic");               
+                entity.HasKey(e => new { e.GameId, e.EpicStoreId });               
+                entity.Property(e => e.GameId).HasColumnName("GameId");
+                entity.Property(e => e.EpicStoreId).HasColumnName("EpicStoreId");               
+                entity.HasOne(d => d.Game)
+                      .WithOne(p => p.EpicData) 
+                      .HasForeignKey<GameInEpic>(d => d.GameId) 
+                      .OnDelete(DeleteBehavior.Cascade);
+            });
         }
     }
 }

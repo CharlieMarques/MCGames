@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Newsletter.DTOs.Category;
 using Newsletter.DTOs.Games;
 using Newsletter.DTOs.Genres;
 using Newsletter.DTOs.Platforms;
@@ -91,7 +92,7 @@ namespace Newsletter.Services
             return true;
         }
 
-        public async Task<PagedResult<GameReadDto>> GetGamesAsync(Guid? id, string? name, bool? state, List<int>? genreIds,string sortBy,int page, int pageSize)
+        public async Task<PagedResult<GameReadDto>> GetGamesAsync(Guid? id, string? name, bool? state,bool? onOffer, List<int>? genreIds,List<int>categoryIds,string sortBy,int page, int pageSize)
         {
             var query = _repository.GetQueryable();
             if (id.HasValue)
@@ -108,9 +109,17 @@ namespace Newsletter.Services
             {
                 query = query.Where(g => g.State == state.Value);
             }
+            if(onOffer.HasValue)
+            {
+                query = query.Where(g => g.OnOffer == onOffer.Value);
+            }
             if(genreIds != null && genreIds.Any())
             {
                 query = query.Where(g => g.GameGenre.Any(gg => genreIds.Contains(gg.Genre.Id)));
+            }
+            if(categoryIds != null  && categoryIds.Any())
+            {
+                query = query.Where(g => g.GameCategories.Any(gc => categoryIds.Contains(gc.CategoryId)));
             }
             if(sortBy == "releasedate_desc")
             {
@@ -139,11 +148,21 @@ namespace Newsletter.Services
                     Id = g.Id,
                     Name = g.Name,
                     State = g.State,
-                    ShortDescription = g.ShortDescription,
+                    SteamAppId = g.SteamAppId,
+                  ShortDescription = g.ShortDescription,
                     ReleaseDate = g.ReleaseDate,
                     GameCoverUrl = g.GameCoverUrl,
                     Price = g.Price,
                     OnOffer = g.OnOffer,
+                    DiscountPercentage = g.DiscountPercentage,
+                    FinalPrice = g.FinalPrice,
+                    
+                  Categories = g.GameCategories.Select(gc => new CategoryReadDto
+                  {
+                      Id = gc.Category.Id,
+                      Description = gc.Category.Description
+                  })
+                  .ToList(),
 
                   Genres = g.GameGenre.Select(gg => new GenreDto
                   {
@@ -168,6 +187,11 @@ namespace Newsletter.Services
                 CurrentPage = page,
                 Items = items,
             };
+        }
+
+        public async Task<IEnumerable<Game>> GetMultiPlatformGamesAsync()
+        {
+            return await _repository.GetMultiPlatformGamesAsync();
         }
 
         public async Task<Game> HideGame(Guid id, bool state)

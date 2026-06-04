@@ -1,15 +1,11 @@
-// ==========================================
-// VARIABLES GLOBALES
-// ==========================================
+
 let currentPage = 1;
 const pageSize = 24;
-let currentSearchTerm = ''; 
-let selectedGenres = []; 
+let currentSearchTerm = '';
+let selectedGenres = [];
 let currentSort = 'name_asc';
+let soloOfertas = false;
 
-// ==========================================
-// INICIALIZACIÓN AL CARGAR LA PÁGINA
-// ==========================================
 document.addEventListener('DOMContentLoaded', () => {
     if (typeof renderizarNavbar === 'function') renderizarNavbar();
     if (typeof verificarEstadoAuth === 'function') verificarEstadoAuth();
@@ -38,26 +34,22 @@ function buscarJuegosLocales() {
     const searchInput = document.getElementById('search-input');
     if (searchInput) {
         currentSearchTerm = searchInput.value.trim();
-        cargarCatalogo(1); 
+        cargarCatalogo(1);
     }
 }
 
-// ==========================================
-// FILTROS LATERALES
-// ==========================================
 async function cargarGenerosFiltro() {
     const container = document.getElementById('filter-genres');
-    
+
     try {
         const response = await fetch(`${API_BASE_URL}/Genre/GET/genres`);
         if (!response.ok) throw new Error("Error de conexión");
-        
+
         const generos = await response.json();
         let htmlContent = '<div id="genres-list">';
 
         generos.forEach((g, index) => {
             const nombre = g.description || g.name || 'Desconocido';
-            // Ocultamos los géneros del 6 en adelante
             const ocultarClase = index >= 5 ? 'd-none extra-genre' : '';
 
             htmlContent += `
@@ -115,28 +107,35 @@ function actualizarFiltrosGenero() {
     selectedGenres = Array.from(checkboxes).map(cb => cb.value);
     cargarCatalogo(1);
 }
+function actualizarFiltroOfertas() {
+    const checkbox = document.getElementById('filter-offers');
+    if (checkbox) {
+        soloOfertas = checkbox.checked;
+        cargarCatalogo(1);
+    }
+}
 function cambiarOrden() {
     const select = document.getElementById('sort-select');
     if (select) {
         currentSort = select.value;
-        cargarCatalogo(1); // Recargamos desde la página 1 con el nuevo orden
+        cargarCatalogo(1);
     }
 }
 
-// ==========================================
-// CARGAR CATÁLOGO (GRILLA)
-// ==========================================
 async function cargarCatalogo(page) {
     currentPage = page;
     const grid = document.getElementById('catalog-grid');
     const info = document.getElementById('catalog-info');
-    
-    if (!grid) return; 
+
+    if (!grid) return;
     grid.innerHTML = '<div class="col-12 text-center py-5"><span class="spinner-border text-accent"></span> Buscando juegos...</div>';
 
     try {
         let url = `${API_BASE_URL}/Game/GET/games?page=${currentPage}&pageSize=${pageSize}&sortBy=${currentSort}`;
-        
+        if (soloOfertas) {
+            url += `&onOffer=true`;
+        }
+
         if (currentSearchTerm && currentSearchTerm.trim() !== '') {
             url += `&name=${encodeURIComponent(currentSearchTerm.trim())}`;
         }
@@ -155,7 +154,7 @@ async function cargarCatalogo(page) {
         const totalPages = data.totalPages || 1;
         const totalRecords = data.totalRecords || juegos.length;
 
-        grid.innerHTML = ''; 
+        grid.innerHTML = '';
 
         if (juegos.length === 0) {
             grid.innerHTML = `
@@ -172,25 +171,43 @@ async function cargarCatalogo(page) {
 
         juegos.forEach(juego => {
             const imageUrl = juego.gameCoverUrl || 'https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&w=400&q=80';
-            const precioHTML = juego.price > 0 
-                ? `<span class="text-light fw-bold mini-card-price">USD ${juego.price.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>` 
-                : `<span class="text-success fw-bold mini-card-price">Gratis</span>`;
 
-            const cardHTML = `
-                <div class="col-12 col-sm-6 col-lg-4 col-xl-3">
-                    <div class="card h-100 bg-dark border-secondary game-card shadow-sm">
-                        <a href="detalle-juego.html?gameId=${juego.id}" class="text-decoration-none">
-                            <img src="${imageUrl}" class="card-img-top mini-card-img" alt="${juego.name}">
-                            <div class="card-body p-2 d-flex flex-column">
-                                <h6 class="card-title text-white fw-bold text-truncate mini-card-title" title="${juego.name}">${juego.name}</h6>
-                                <div class="mt-auto d-flex justify-content-between align-items-center pt-2 border-top border-secondary">
-                                    ${precioHTML}
-                                </div>
-                            </div>
-                        </a>
-                    </div>
+            let precioHTML = '';
+
+            if (juego.onOffer && juego.discountPercentage > 0) {
+                precioHTML = `
+            <div class="d-flex flex-column text-start">
+                <span class="text-secondary text-decoration-line-through x-small" style="font-size: 0.75rem;">
+                    USD ${juego.price.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                </span>
+                <div class="d-flex align-items-center gap-1">
+                    <span class="badge bg-success font-monospace p-1" style="font-size: 0.65rem;">-${juego.discountPercentage}%</span>
+                    <span class="text-white fw-bold small">
+                        USD ${juego.finalPrice.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                    </span>
                 </div>
-            `;
+            </div>
+        `;
+            } else {
+                precioHTML = juego.price > 0
+                    ? `<span class="text-light fw-bold mini-card-price">USD ${juego.price.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>`
+                    : `<span class="text-success fw-bold mini-card-price">Gratis</span>`;
+            }
+            const cardHTML = `
+        <div class="col-12 col-sm-6 col-lg-4 col-xl-3">
+            <div class="card h-100 bg-dark border-secondary game-card shadow-sm">
+                <a href="detalle-juego.html?gameId=${juego.id}" class="text-decoration-none">
+                    <img src="${imageUrl}" class="card-img-top mini-card-img" alt="${juego.name}">
+                    <div class="card-body p-2 d-flex flex-column">
+                        <h6 class="card-title text-white fw-bold text-truncate mini-card-title" title="${juego.name}">${juego.name}</h6>
+                        <div class="mt-auto d-flex justify-content-between align-items-center pt-2 border-top border-secondary">
+                            ${precioHTML}
+                        </div>
+                    </div>
+                </a>
+            </div>
+        </div>
+    `;
             grid.innerHTML += cardHTML;
         });
 
@@ -202,25 +219,19 @@ async function cargarCatalogo(page) {
     }
 }
 
-// ==========================================
-// PAGINACIÓN
-// ==========================================
 function dibujarPaginacionCatalogo(totalPages) {
     const controls = document.getElementById('catalog-pagination');
     if (!controls) return;
     controls.innerHTML = '';
-    
-    if (totalPages <= 1) return; 
 
-    // 1. Botón Anterior
+    if (totalPages <= 1) return;
+
     const prevDisabled = currentPage === 1 ? 'disabled' : '';
     controls.innerHTML += `
         <li class="page-item ${prevDisabled}">
             <button class="page-link bg-dark border-secondary text-light" onclick="cambiarPaginaCatalogo(${currentPage - 1})">&laquo;</button>
         </li>
     `;
-
-    // 2. Siempre la PRIMERA página
     const primeraActiva = currentPage === 1 ? 'active bg-accent border-accent text-white' : 'bg-dark border-secondary text-light';
     controls.innerHTML += `
         <li class="page-item">
@@ -228,7 +239,6 @@ function dibujarPaginacionCatalogo(totalPages) {
         </li>
     `;
 
-    // Puntos suspensivos del inicio
     if (currentPage > 3) {
         controls.innerHTML += `
             <li class="page-item disabled">
@@ -237,7 +247,7 @@ function dibujarPaginacionCatalogo(totalPages) {
         `;
     }
 
-    // 3. Rango central dinámico
+
     let startPage = Math.max(2, currentPage - 1);
     let endPage = Math.min(totalPages - 1, currentPage + 1);
 
@@ -250,7 +260,6 @@ function dibujarPaginacionCatalogo(totalPages) {
         `;
     }
 
-    // Puntos suspensivos del final
     if (currentPage < totalPages - 2) {
         controls.innerHTML += `
             <li class="page-item disabled">
@@ -259,7 +268,7 @@ function dibujarPaginacionCatalogo(totalPages) {
         `;
     }
 
-    // 4. Siempre la ÚLTIMA página
+
     if (totalPages > 1) {
         const ultimaActiva = currentPage === totalPages ? 'active bg-accent border-accent text-white' : 'bg-dark border-secondary text-light';
         controls.innerHTML += `
@@ -269,7 +278,7 @@ function dibujarPaginacionCatalogo(totalPages) {
         `;
     }
 
-    // 5. Botón Siguiente
+
     const nextDisabled = currentPage === totalPages ? 'disabled' : '';
     controls.innerHTML += `
         <li class="page-item ${nextDisabled}">

@@ -27,7 +27,9 @@ namespace Newsletter.Controllers
             [FromQuery] Guid? id,
             [FromQuery] string? name,
             [FromQuery] bool? state,
+            [FromQuery] bool? onOffer,
             [FromQuery] List<int>? genreIds,
+            [FromQuery] List<int>? categoryIds,
             [FromQuery] string? sortBy,
             [FromQuery] int page =1,
             [FromQuery] int pageSize =10)
@@ -47,8 +49,24 @@ namespace Newsletter.Controllers
             {
                 sortBy = "name_asc";
             }
-            var games = await _gameService.GetGamesAsync(id, name, stateFinal,genreIds,sortBy,page,pageSize);
+            var games = await _gameService.GetGamesAsync(id, name, stateFinal,onOffer,genreIds,categoryIds,sortBy,page,pageSize);
             return Ok(games);
+        }
+
+        [HttpGet("GET/MultiplatformGames")]
+        public async Task<IActionResult> GetJuegosMultiplataforma()
+        {
+            try
+            {
+                // 💡 Buscamos los juegos que tienen cargados datos de Steam Y de Epic al mismo tiempo
+                var juegosCruzados = await _gameService.GetMultiPlatformGamesAsync();
+
+                return Ok(juegosCruzados);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Error al obtener los juegos unificados: {ex.Message}");
+            }
         }
 
         /// Posts

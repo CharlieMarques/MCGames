@@ -1,4 +1,5 @@
-﻿using Newsletter.Data;
+﻿using Microsoft.EntityFrameworkCore;
+using Newsletter.Data;
 using Newsletter.Models;
 
 namespace Newsletter.Repositories
@@ -23,6 +24,14 @@ namespace Newsletter.Repositories
         public async Task<Game?>GetByIdAsync(Guid id)
         {
             return await _context.Games.FindAsync(id);
+        }
+
+        public async Task<IEnumerable<Game>> GetMultiPlatformGamesAsync()
+        {
+            return await _context.Games
+        .Include(g => g.EpicData) 
+        .Where(g => g.SteamAppId != null && g.EpicData != null)
+        .ToListAsync();
         }
 
         public IQueryable<Game> GetQueryable()

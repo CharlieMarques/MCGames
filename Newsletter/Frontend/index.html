@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PlayHub - Tu tienda de videojuegos</title>
+    <title>MCGames - Tu tienda de videojuegos</title>
     <!-- Bootstrap 5.3 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Iconos de Bootstrap (Para el buscador y logos) -->
@@ -42,18 +42,29 @@
     </button>
 </section>
 
-        <!-- SECCIÓN DE JUEGOS DESTACADOS -->
-        <section class="mb-5">
-            <div class="d-flex justify-content-between align-items-center mb-4">
-                <h2 class="h4 fw-bold m-0 text-white">Destacados</h2>
-                <a href="#" class="btn btn-sm btn-outline-secondary text-light">Ver todos</a>
-            </div>
+<section class="mb-5 mt-4">
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2 class="h4 fw-bold m-0 text-white">
+        <i class="bi bi-percent text-success me-2"></i>Ofertas Imperdibles
+    </h2>
+    <a href="pages/catalogo.html" class="btn btn-sm btn-outline-accent">Ver todas</a>
+</div>
 
-            <!-- GRILLA DE JUEGOS (El ID es vital para conectar con JavaScript) -->
-            <div class="row g-4" id="games-grid">
-                <!-- JavaScript inyectará las tarjetas aquí -->
-            </div>
-        </section>
+<div class="row g-3 flex-nowrap overflow-x-auto pb-3" id="games-offers-grid" style="scrollbar-width: thin;">
+    </div>
+</section>
+        <!-- SECCIÓN DE JUEGOS DESTACADOS -->
+  <section class="mb-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="h4 fw-bold m-0 text-white">
+            <i class="bi bi-controller text-info me-2"></i>Disponibles en Epic y Steam
+        </h2>
+        <a href="pages/catalogo.html" class="btn btn-sm btn-outline-secondary text-light">Ver todos</a>
+    </div>
+
+    <div class="row g-4" id="games-grid">
+        </div>
+</section>
     </main>
 
     <!-- Bootstrap Bundle JS -->

@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Newsletter.Data;
 
@@ -11,9 +12,11 @@ using Newsletter.Data;
 namespace Newsletter.Migrations
 {
     [DbContext(typeof(NewsletterDbContext))]
-    partial class NewsletterDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260526005051_AgregadoCategoriesDiscount")]
+    partial class AgregadoCategoriesDiscount
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

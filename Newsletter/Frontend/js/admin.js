@@ -1,7 +1,7 @@
-// Variable global para controlar el modal de Bootstrap
+
 let modalJuegoBootstrap;
 let adminCurrentPage = 1;
-const adminPageSize = 10; // Ponemos 10 para que la paginación se note rápido
+const adminPageSize = 10; 
 let adminSearchTerm = '';
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -28,25 +28,20 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
     }
 
-    // Inicializar el modal de Bootstrap
     modalJuegoBootstrap = new bootstrap.Modal(document.getElementById('modalJuego'));
     modalGeneroBootstrap = new bootstrap.Modal(document.getElementById('modalGenero'));
     modalPlataformaBootstrap = new bootstrap.Modal(document.getElementById('modalPlataforma'));
 
-    // Cargar la tabla por primera vez
     cargarJuegosAdmin();
     cargarGenerosAdmin();
     cargarPlataformasAdmin();
 
-    // Activar buscador con "Enter"
+  
     document.getElementById('admin-search-game').addEventListener('keypress', (e) => {
         if (e.key === 'Enter') buscarJuegoAdmin();
     });
 });
 
-// ==========================================
-// LEER Y BUSCAR JUEGOS
-// ==========================================
 function buscarJuegoAdmin() {
     adminSearchTerm = document.getElementById('admin-search-game').value.trim();
     cargarJuegosAdmin(1); // Siempre que buscamos algo nuevo, volvemos a la página 1
@@ -102,7 +97,6 @@ async function cargarJuegosAdmin(page = 1) {
             `;
         });
 
-        // Llamamos a nuestra nueva súper función de paginación
         dibujarPaginacionAdmin(totalPages);
 
     } catch (error) {
@@ -125,24 +119,21 @@ function dibujarPaginacionAdmin(totalPages) {
         </li>
     `;
 
-    // 2. Algoritmo para calcular los números a mostrar
-    let delta = 2; // Cuántos números mostrar a la izquierda y derecha de la página actual
+    let delta = 2; 
     let range = [];
     let rangeWithDots = [];
     let l;
 
-    // Primero recolectamos los números puros que deberían verse (Ej: 1, 54, 55, 56, 57, 58, 99)
     for (let i = 1; i <= totalPages; i++) {
         if (i === 1 || i === totalPages || (i >= adminCurrentPage - delta && i <= adminCurrentPage + delta)) {
             range.push(i);
         }
     }
 
-    // Luego insertamos los puntos suspensivos donde haya saltos
+
     for (let i of range) {
         if (l) {
             if (i - l === 2) {
-                // Si el salto es de solo 1 número (Ej: de 1 a 3), ponemos el 2 en vez de "..."
                 rangeWithDots.push(l + 1);
             } else if (i - l !== 1) {
                 // Si el salto es mayor, ponemos los puntos
@@ -153,7 +144,6 @@ function dibujarPaginacionAdmin(totalPages) {
         l = i;
     }
 
-    // 3. Dibujar los botones en el HTML
     for (let i of rangeWithDots) {
         if (i === '...') {
             controls.innerHTML += `<li class="page-item disabled"><span class="page-link bg-dark border-secondary text-secondary">...</span></li>`;
@@ -167,7 +157,7 @@ function dibujarPaginacionAdmin(totalPages) {
         }
     }
 
-    // 4. Botón Siguiente
+
     const nextDisabled = adminCurrentPage === totalPages ? 'disabled' : '';
     controls.innerHTML += `
         <li class="page-item ${nextDisabled}">
@@ -175,11 +165,7 @@ function dibujarPaginacionAdmin(totalPages) {
         </li>
     `;
 }
-// ==========================================
-// CREAR Y EDITAR (MODAL)
-// ==========================================
 function abrirModalJuego() {
-    // Modo CREAR: Limpiamos el formulario
     document.getElementById('form-juego').reset();
     document.getElementById('juego-id').value = '';
     document.getElementById('modalJuegoTitle').textContent = 'Nuevo Juego';
@@ -187,7 +173,6 @@ function abrirModalJuego() {
 }
 
 async function abrirModalEditar(id) {
-    // Modo EDITAR: Traemos los datos del juego y llenamos el formulario
     try {
         const response = await fetch(`${API_BASE_URL}/Game/GET/games?id=${id}&page=1&pageSize=1`);
         const data = await response.json();
@@ -224,7 +209,6 @@ async function guardarJuego() {
         return;
     }
 
-    // Armamos el objeto DTO para C#
     const juegoData = {
         Name: nombre,
         Price: precio,
@@ -235,7 +219,7 @@ async function guardarJuego() {
 
     const token = localStorage.getItem('jwtToken');
     const method = id ? 'PUT' : 'POST';
-    const url = id ? `${API_BASE_URL}/Game/PUT/games/${id}` : `${API_BASE_URL}/Game/POST/games`;
+    const url = id ? `${API_BASE_URL}/Game/Edit/game/${id}` : `${API_BASE_URL}/Game/Create/game`;
 
     try {
         const response = await fetch(url, {
@@ -250,7 +234,7 @@ async function guardarJuego() {
         if (!response.ok) throw new Error("Error al guardar");
 
         modalJuegoBootstrap.hide();
-        cargarJuegosAdmin(); // Recargar la tabla
+        cargarJuegosAdmin();
 
     } catch (error) {
         alert("Ocurrió un error al intentar guardar el juego.");
@@ -258,22 +242,21 @@ async function guardarJuego() {
     }
 }
 
-// ==========================================
-// ELIMINAR JUEGO
-// ==========================================
+
+
 async function eliminarJuego(id) {
     if (confirm("¿Estás seguro de que deseas eliminar este juego? Esta acción no se puede deshacer.")) {
         const token = localStorage.getItem('jwtToken');
 
         try {
-            const response = await fetch(`${API_BASE_URL}/Game/DELETE/games/${id}`, {
+            const response = await fetch(`${API_BASE_URL}/Game/DELETE/game/${id}`, {
                 method: 'DELETE',
                 headers: { 'Authorization': `Bearer ${token}` }
             });
 
             if (!response.ok) throw new Error("Error al eliminar");
 
-            cargarJuegosAdmin(); // Recargar la tabla
+            cargarJuegosAdmin(); 
 
         } catch (error) {
             alert("No se pudo eliminar el juego. Puede que tenga ventas asociadas.");
@@ -375,8 +358,6 @@ async function cargarPlataformasAdmin() {
     tbody.innerHTML = '<tr><td colspan="3" class="text-center py-4"><span class="spinner-border text-accent"></span> Cargando plataformas...</td></tr>';
 
     try {
-        // 🚨 REVISIÓN DE URL: Asegúrate de que coincida con tu Swagger
-        // Si tu endpoint es /api/Platform/GET/all o /api/Platforms, cámbialo aquí:
         const response = await fetch(`${API_BASE_URL}/Platform/GET/platforms`); 
         
         if (!response.ok) {
@@ -392,7 +373,6 @@ async function cargarPlataformasAdmin() {
         }
 
         plataformas.forEach(p => {
-            // 💡 Tolerancia a Mayúsculas/Minúsculas: Validamos p.id y p.Id, p.description y p.Description
             const id = p.id !== undefined ? p.id : p.Id;
             const descripcion = p.description || p.Description || p.name || p.Name || 'Sin nombre';
 

@@ -13,8 +13,13 @@ using System.Text;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-
-builder.Services.AddControllers();
+builder.Services.AddHttpClient();
+builder.Services.AddControllers()
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles;
+        options.JsonSerializerOptions.PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase;
+    });
 
 builder.Services.AddCors(options =>
 {
@@ -36,6 +41,8 @@ builder.Services.AddScoped<IPlatformService, PlatformService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<ILibraryRepository, LibraryRepository>();
 builder.Services.AddScoped<ILibraryService, LibraryService>();
+builder.Services.AddHostedService<SteamCronService>();
+builder.Services.AddScoped<EpicImportService>();
 builder.Services.AddDbContext<NewsletterDbContext>(options =>
 options.UseSqlServer(builder.Configuration.GetConnectionString("NewsletterDbContext")));
 builder.Services.AddIdentityCore<User>(options =>
