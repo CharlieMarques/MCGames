@@ -8,9 +8,8 @@ https://www.mcgames.com.ar/
 ## 🛠️ Tecnologías Utilizadas
 **Backend:**
 * C# / ASP.NET Core (RESTful API)
-* Entity Framework Core (Database-First / Code-First)
+* Entity Framework Core ( Code-First)
 * SQL Server (Base de datos relacional)
-* PuppeteerSharp (Automatización y Scraping)
 * JWT (JSON Web Tokens para seguridad y sesiones)
 * 
 **Frontend:**
