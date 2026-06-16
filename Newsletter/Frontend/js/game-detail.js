@@ -22,6 +22,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 async function cargarDetallesDelJuego(gameId) {
     try {
+        // En tu backend, este endpoint de /games?id=... ya te devuelve el objeto del juego con los datos de Steam y Epic
         const response = await fetch(`${API_BASE_URL}/Game/GET/games?id=${gameId}&page=1&pageSize=10`);
 
         if (!response.ok) {
@@ -29,7 +30,6 @@ async function cargarDetallesDelJuego(gameId) {
         }
 
         const data = await response.json();
-
         const listaJuegos = Array.isArray(data) ? data : (data.items || []);
 
         if (!listaJuegos || listaJuegos.length === 0) {
@@ -37,10 +37,9 @@ async function cargarDetallesDelJuego(gameId) {
         }
 
         const juego = listaJuegos[0];
-
-
         const imageUrl = juego.gameCoverUrl || 'https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&w=800&q=80';
 
+        // 1. Fondos y Títulos
         const heroBg = document.getElementById('hero-background');
         if (heroBg) {
             heroBg.style.backgroundImage = `url('${imageUrl}')`;
@@ -54,6 +53,7 @@ async function cargarDetallesDelJuego(gameId) {
         }
 
         document.getElementById('game-title').textContent = juego.name;
+        
         if (juego.releaseDate) {
             const fecha = new Date(juego.releaseDate).toLocaleDateString('es-ES', { year: 'numeric', month: 'long', day: 'numeric' });
             document.getElementById('game-release').innerHTML = `<i class="bi bi-calendar3"></i> Lanzamiento: ${fecha}`;
@@ -61,42 +61,108 @@ async function cargarDetallesDelJuego(gameId) {
             document.getElementById('game-release').textContent = "Lanzamiento: Desconocido";
         }
 
+        // 💡 2. NUEVO: Lógica de Precios y Botones de Tiendas
+        const pricesContainer = document.getElementById('game-prices-container');
+        if (pricesContainer) {
+            pricesContainer.innerHTML = ''; // Limpiamos el estado inicial
+
+            // --- TARJETA DE STEAM ---
+            if (juego.steamAppId) {
+                let steamPriceHTML = '';
+                if (juego.price === 0) {
+                    steamPriceHTML = '<h5 class="mb-0 text-success fw-bold">Gratis</h5>';
+                } else if (juego.onOffer && juego.discountPercentage > 0) {
+                    steamPriceHTML = `
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="badge bg-success fs-6">-${juego.discountPercentage}%</span>
+                            <div class="d-flex flex-column text-start">
+                                <span class="text-secondary text-decoration-line-through" style="font-size: 0.8rem;">USD ${juego.price.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                                <span class="text-white fw-bold">USD ${juego.finalPrice.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    steamPriceHTML = `<h5 class="mb-0 text-white fw-bold">USD ${juego.finalPrice.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</h5>`;
+                }
+
+                pricesContainer.innerHTML += `
+                    <div class="p-3 rounded border border-secondary bg-black bg-opacity-50 d-flex flex-column justify-content-between shadow-sm" style="min-width: 210px; backdrop-filter: blur(5px);">
+                        <div class="mb-3 d-flex align-items-center gap-2">
+                            <i class="bi bi-steam fs-5 text-white"></i>
+                            <span class="text-secondary fw-bold small text-uppercase tracking-wide">Steam</span>
+                        </div>
+                        <div class="mb-3">
+                            ${steamPriceHTML}
+                        </div>
+                        <a href="https://store.steampowered.com/app/${juego.steamAppId}" target="_blank" class="btn btn-sm btn-outline-light mt-auto fw-bold">
+                            Ver en la tienda <i class="bi bi-box-arrow-up-right ms-1"></i>
+                        </a>
+                    </div>
+                `;
+            }
+
+            // --- TARJETA DE EPIC GAMES ---
+            if (juego.epicStoreId) {
+                let epicPriceHTML = '';
+                if (juego.epicPrice === 0) {
+                    epicPriceHTML = '<h5 class="mb-0 text-success fw-bold">Gratis</h5>';
+                } else if (juego.epicOnOffer && juego.epicDiscountPercentage > 0) {
+                    epicPriceHTML = `
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="badge bg-success fs-6">-${juego.epicDiscountPercentage}%</span>
+                            <div class="d-flex flex-column text-start">
+                                <span class="text-secondary text-decoration-line-through" style="font-size: 0.8rem;">USD ${juego.epicPrice.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                                <span class="text-info fw-bold">USD ${juego.epicFinalPrice.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    epicPriceHTML = `<h5 class="mb-0 text-info fw-bold">USD ${juego.epicFinalPrice.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</h5>`;
+                }
+
+                pricesContainer.innerHTML += `
+                    <div class="p-3 rounded border border-secondary bg-black bg-opacity-50 d-flex flex-column justify-content-between shadow-sm" style="min-width: 210px; backdrop-filter: blur(5px);">
+                        <div class="mb-3 d-flex align-items-center gap-2">
+                            <i class="bi bi-controller fs-5 text-info"></i>
+                            <span class="text-secondary fw-bold small text-uppercase tracking-wide">Epic Games</span>
+                        </div>
+                        <div class="mb-3">
+                            ${epicPriceHTML}
+                        </div>
+                        <a href="https://store.epicgames.com/p/${juego.epicStoreId}" target="_blank" class="btn btn-sm btn-outline-info mt-auto fw-bold">
+                            Ver en la tienda <i class="bi bi-box-arrow-up-right ms-1"></i>
+                        </a>
+                    </div>
+                `;
+            }
+        }
+
+        // 3. Descripción, Géneros y Categorías
         document.getElementById('game-description').textContent = juego.shortDescription || 'Sin descripción disponible para este título.';
 
-const genresContainer = document.getElementById('game-genres');
-if (genresContainer) {
-    genresContainer.innerHTML = '';
-    
-    if (juego.genres && juego.genres.length > 0) {
-        juego.genres.forEach(g => {
-            genresContainer.innerHTML += `
-                <span class="badge bg-dark border border-secondary text-light px-2 py-1">${g.description}</span>
-            `;
-        });
-    } else {
-        genresContainer.innerHTML = '<span class="text-muted small fst-italic">Sin géneros</span>';
-    }
-}
-const categoryContainer = document.getElementById('game-category');
+        const genresContainer = document.getElementById('game-genres');
+        if (genresContainer) {
+            genresContainer.innerHTML = '';
+            if (juego.genres && juego.genres.length > 0) {
+                juego.genres.forEach(g => {
+                    genresContainer.innerHTML += `<span class="badge bg-dark border border-secondary text-light px-2 py-1">${g.description}</span>`;
+                });
+            } else {
+                genresContainer.innerHTML = '<span class="text-muted small fst-italic">Sin géneros</span>';
+            }
+        }
 
-if (categoryContainer) {
-    categoryContainer.innerHTML = '';
-
-    if (juego.categories && juego.categories.length > 0) {
-        
-        juego.categories.forEach(cat => {
-            categoryContainer.innerHTML += `
-                <span class="badge bg-accent px-3 py-1 text-uppercase font-monospace shadow-sm me-2 mb-2" style="letter-spacing: 0.5px;">
-                    ${cat.description}
-                </span>
-            `;
-        });
-        
-    } else {
-        categoryContainer.innerHTML = '<span class="text-muted small fst-italic">Sin categorías asignadas</span>';
-    }
-}
-     
+        const categoryContainer = document.getElementById('game-category');
+        if (categoryContainer) {
+            categoryContainer.innerHTML = '';
+            if (juego.categories && juego.categories.length > 0) {
+                juego.categories.forEach(cat => {
+                    categoryContainer.innerHTML += `<span class="badge bg-accent px-3 py-1 text-uppercase font-monospace shadow-sm me-2 mb-2" style="letter-spacing: 0.5px;">${cat.description}</span>`;
+                });
+            } else {
+                categoryContainer.innerHTML = '<span class="text-muted small fst-italic">Sin categorías asignadas</span>';
+            }
+        }
 
     } catch (error) {
         console.error("Error cargando el juego:", error);

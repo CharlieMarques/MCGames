@@ -38,11 +38,13 @@ builder.Services.AddScoped<IGenreRepository, GenreRepository>();
 builder.Services.AddScoped<IGenreService, GenreService>();
 builder.Services.AddScoped<IPlatformRepository, PlatformRepository>();
 builder.Services.AddScoped<IPlatformService, PlatformService>();
+builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<ILibraryRepository, LibraryRepository>();
 builder.Services.AddScoped<ILibraryService, LibraryService>();
 builder.Services.AddHostedService<SteamCronService>();
-builder.Services.AddScoped<EpicImportService>();
+//builder.Services.AddScoped<EpicImportService>();
+//builder.Services.AddHostedService<Newsletter.Services.EpicBotBackgroundService>();
 builder.Services.AddDbContext<NewsletterDbContext>(options =>
 options.UseSqlServer(builder.Configuration.GetConnectionString("NewsletterDbContext")));
 builder.Services.AddIdentityCore<User>(options =>

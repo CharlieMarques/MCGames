@@ -413,7 +413,7 @@ async function guardarPlataforma() {
 
     const token = localStorage.getItem('jwtToken');
     const method = id ? 'PUT' : 'POST';
-    const url = id ? `${API_BASE_URL}/Platform/PUT/platforms/${id}` : `${API_BASE_URL}/Platform/POST/platforms`; // 🚨 Verifica tus endpoints
+    const url = id ? `${API_BASE_URL}/Platform/PUT/platforms/${id}` : `${API_BASE_URL}/Platform/POST/platforms`;
 
     try {
         const response = await fetch(url, {

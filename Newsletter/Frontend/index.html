@@ -5,71 +5,67 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MCGames - Tu tienda de videojuegos</title>
-    <!-- Bootstrap 5.3 CSS -->
+    <link rel="icon" type="image/svg+xml" href="./assets/icons/Logo.svg">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Iconos de Bootstrap (Para el buscador y logos) -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
-    <!-- Tu CSS Personalizado -->
     <link rel="stylesheet" href="./css/style.css">
 </head>
 
 <body>
     <div id="navbar-container"></div>
 
-    <!-- CONTENIDO PRINCIPAL -->
     <main class="container my-5">
 
- <section id="hero-carousel" class="carousel slide mb-5" data-bs-ride="carousel">
-    <div class="carousel-indicators" id="carousel-indicators"></div>
-    <div class="carousel-inner" id="carousel-inner">
-        <div class="carousel-item active">
-            <div class="hero-banner" style="background-image: url('https://images.unsplash.com/photo-1605901309584-818e25960b8f?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80');">
-                <div class="hero-overlay"></div>
-                <div class="hero-content text-center w-100">
-                    <h2 class="text-white">Cargando últimos lanzamientos...</h2>
+     <section id="hero-carousel" class="carousel slide mb-5" data-bs-ride="carousel">
+            <div class="carousel-indicators" id="carousel-indicators"></div>
+            <div class="carousel-inner" id="carousel-inner">
+                <div class="carousel-item active">
+                    <div class="hero-banner" style="background-image: url('https://images.unsplash.com/photo-1605901309584-818e25960b8f?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80'); height: 40vh; min-height: 300px;">
+                        <div class="hero-overlay"></div>
+                        <div class="hero-content text-center w-100">
+                            <h2 class="text-white">Cargando últimos lanzamientos...</h2>
+                        </div>
+                    </div>
                 </div>
             </div>
-        </div>
-    </div>
-    
-    <button class="carousel-control-prev" type="button" data-bs-target="#hero-carousel" data-bs-slide="prev">
-        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-        <span class="visually-hidden">Anterior</span>
-    </button>
-    <button class="carousel-control-next" type="button" data-bs-target="#hero-carousel" data-bs-slide="next">
-        <span class="carousel-control-next-icon" aria-hidden="true"></span>
-        <span class="visually-hidden">Siguiente</span>
-    </button>
-</section>
+            
+            <button class="carousel-control-prev" type="button" data-bs-target="#hero-carousel" data-bs-slide="prev">
+                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                <span class="visually-hidden">Anterior</span>
+            </button>
+            <button class="carousel-control-next" type="button" data-bs-target="#hero-carousel" data-bs-slide="next">
+                <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                <span class="visually-hidden">Siguiente</span>
+            </button>
+        </section>
 
-<section class="mb-5 mt-4">
-<div class="d-flex justify-content-between align-items-center mb-3">
-    <h2 class="h4 fw-bold m-0 text-white">
-        <i class="bi bi-percent text-success me-2"></i>Ofertas Imperdibles
-    </h2>
-    <a href="pages/catalogo.html" class="btn btn-sm btn-outline-accent">Ver todas</a>
-</div>
+        <section class="mb-5 mt-4">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h2 class="h4 fw-bold m-0 text-white">
+                    <i class="bi bi-percent text-success me-2"></i>Ofertas Imperdibles
+                </h2>
+                <a href="pages/catalogo.html" class="btn btn-sm btn-outline-accent">Ver todas</a>
+            </div>
 
-<div class="row g-3 flex-nowrap overflow-x-auto pb-3" id="games-offers-grid" style="scrollbar-width: thin;">
-    </div>
-</section>
-        <!-- SECCIÓN DE JUEGOS DESTACADOS -->
-  <section class="mb-5">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2 class="h4 fw-bold m-0 text-white">
-            <i class="bi bi-controller text-info me-2"></i>Disponibles en Epic y Steam
-        </h2>
-        <a href="pages/catalogo.html" class="btn btn-sm btn-outline-secondary text-light">Ver todos</a>
-    </div>
+            <div class="row g-3 flex-nowrap overflow-x-auto pb-3" id="games-offers-grid" style="scrollbar-width: thin;">
+            </div>
+        </section>
 
-    <div class="row g-4" id="games-grid">
-        </div>
-</section>
+        <section class="mb-5">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2 class="h4 fw-bold m-0 text-white">
+                    <i class="bi bi-controller text-info me-2"></i>Disponibles en Epic y Steam
+                </h2>
+                <a href="pages/catalogo.html" class="btn btn-sm btn-outline-secondary text-light">Ver todos</a>
+            </div>
+
+            <div class="row g-4" id="games-grid">
+            </div>
+        </section>
     </main>
 
-    <!-- Bootstrap Bundle JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="./js/config/api.js""></script>
+    <script src="./js/config/api.js"></script>
     <script src="./js/navbar.js"></script>
     <script src="./js/index.js"></script>
 </body>

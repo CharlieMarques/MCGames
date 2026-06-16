@@ -1,5 +1,4 @@
 document.addEventListener('DOMContentLoaded', () => {  
-
     cargarContenidoInicial();
     cargarOfertasIndex();
 });
@@ -13,7 +12,8 @@ async function cargarContenidoInicial() {
 
     try {
         const [responseJuegos, responseCarrusel] = await Promise.all([
-            fetch(`${API_BASE_URL}/Game/GET/MultiplatformGames`), 
+            // 💡 Solicitamos los juegos que están en ambas plataformas
+            fetch(`${API_BASE_URL}/Game/GET/games?store=both&page=1&pageSize=10`), 
             fetch(`${API_BASE_URL}/Game/GET/games?sortBy=releasedate_desc&page=1&pageSize=3`) 
         ]);
         
@@ -29,6 +29,7 @@ async function cargarContenidoInicial() {
         
         configurarCarruselInizial(juegosCarrusel);
         grid.innerHTML = ''; 
+
         if (juegosGrid.length === 0) {
             grid.innerHTML = '<div class="col-12 text-center text-secondary py-5">No hay juegos multiplataforma disponibles en este momento.</div>';
             return;
@@ -36,44 +37,63 @@ async function cargarContenidoInicial() {
 
         juegosGrid.forEach(juego => {
             const imageUrl = juego.gameCoverUrl || 'https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&w=800&q=80';
-            const precioSteam = juego.price === 0 
-                ? '<span class="text-success fw-bold">Gratis</span>' 
-                : `USD ${juego.finalPrice.toLocaleString('en-US', { minimumFractionDigits: 2 })}`;
+            
+            // 💰 Lógica Visual de Precios para Steam
+            let steamHTML = '<span class="text-muted small">No disp.</span>';
+            if (juego.steamAppId) {
+                if (juego.price === 0) {
+                    steamHTML = '<span class="text-success fw-bold small">Gratis</span>';
+                } else if (juego.onOffer && juego.discountPercentage > 0) {
+                    steamHTML = `
+                        <span class="text-secondary text-decoration-line-through me-1" style="font-size: 0.7rem;">USD ${juego.price.toFixed(2)}</span>
+                        <span class="text-success fw-bold small">USD ${juego.finalPrice.toFixed(2)}</span>
+                    `;
+                } else {
+                    steamHTML = `<span class="fw-bold text-white small">USD ${juego.finalPrice.toFixed(2)}</span>`;
+                }
+            }
 
-            const precioEpic = juego.epicData 
-                ? (juego.epicData.epicFinalPrice === 0 
-                    ? '<span class="text-success fw-bold">Gratis</span>' 
-                    : `USD ${juego.epicData.epicFinalPrice.toLocaleString('en-US', { minimumFractionDigits: 2 })}`)
-                : '<span class="text-muted small">No disp.</span>';
+   let epicHTML = '<span class="text-muted small">No disp.</span>';
+            
+            if (juego.epicStoreId) {
+                if (juego.epicPrice === 0) {
+                    epicHTML = '<span class="text-success fw-bold small">Gratis</span>';
+                } else if (juego.epicOnOffer && juego.epicDiscountPercentage > 0) {
+                    epicHTML = `
+                        <span class="text-secondary text-decoration-line-through me-1" style="font-size: 0.7rem;">USD ${juego.epicPrice.toFixed(2)}</span>
+                        <span class="text-success fw-bold small">USD ${juego.epicFinalPrice.toFixed(2)}</span>
+                    `;
+                } else {
+                    epicHTML = `<span class="fw-bold text-info small">USD ${juego.epicFinalPrice.toFixed(2)}</span>`;
+                }
+            }
+
             const cardHtml = `
-            <div class="col-6 col-md-4 col-lg-3">
+            <div class="col-12 col-sm-6 col-md-4 col-lg-3">
                 <div class="card h-100 bg-dark text-white border-secondary card-videojuego shadow-sm">
                     <img src="${imageUrl}" class="card-img-top object-fit-cover" alt="${juego.name}" style="height: 220px; object-fit: cover;">
                     
                     <div class="card-body d-flex flex-column justify-content-between p-3">
                         <h5 class="card-title h6 fw-bold text-truncate mb-3" title="${juego.name}">${juego.name}</h5>
                         
-                        <!-- 💰 CONTENEDOR COMPARADOR DE PRECIOS -->
-                        <div class="precios-comparados bg-black bg-opacity-50 p-2 rounded border border-secondary border-opacity-20">
+                        <div class="precios-comparados bg-black bg-opacity-50 p-2 rounded border border-secondary border-opacity-25">
                             
-                            <!-- Fila de Steam -->
-                            <div class="d-flex justify-content-between align-items-center mb-2">
+                            <div class="d-flex justify-content-between align-items-center mb-2 border-bottom border-secondary border-opacity-25 pb-1">
                                 <span class="small text-secondary" style="font-size: 0.8rem;">
-                                    <i class="bi bi-steam text-primary me-1"></i>Steam:
+                                    <i class="bi bi-steam text-white me-1"></i>Steam
                                 </span>
-                                <span class="fw-bold text-white small" style="font-size: 0.85rem;">
-                                    ${precioSteam}
-                                </span>
+                                <div class="text-end">
+                                    ${steamHTML}
+                                </div>
                             </div>
                             
-                            <!-- Fila de Epic Games -->
-                            <div class="d-flex justify-content-between align-items-center">
+                            <div class="d-flex justify-content-between align-items-center pt-1">
                                 <span class="small text-secondary" style="font-size: 0.8rem;">
-                                    <i class="bi bi-bounding-box text-info me-1"></i>Epic:
+                                    <i class="bi bi-controller text-info me-1"></i>Epic
                                 </span>
-                                <span class="fw-bold text-info small" style="font-size: 0.85rem;">
-                                    ${precioEpic}
-                                </span>
+                                <div class="text-end">
+                                    ${epicHTML}
+                                </div>
                             </div>
 
                         </div>
@@ -120,19 +140,21 @@ function configurarCarruselInizial(juegosCarrusel) {
 
         const coverUrl = game.gameCoverUrl || 'https://images.unsplash.com/photo-1605901309584-818e25960b8f?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80';
 
-        innerContainer.innerHTML += `
+ innerContainer.innerHTML += `
             <div class="carousel-item ${isActive}">
-                <div class="hero-banner" style="background-image: url('${coverUrl}');">
+                <div class="hero-banner" style="background-image: url('${coverUrl}'); height: 40vh; min-height: 300px;">
                     <div class="hero-overlay"></div>
                     <div class="hero-content">
-                        <span class="badge mb-3 px-2 py-1" style="background-color: var(--accent-secondary);">ÚLTIMO LANZAMIENTO</span>
-                        <h1 class="display-4 fw-bold text-white mb-3">${game.name.toUpperCase()}</h1>
-                        <p class="lead text-light mb-4" style="color: var(--text-secondary) !important;">
+                        <span class="badge mb-2 px-2 py-1" style="background-color: var(--accent-secondary);">ÚLTIMO LANZAMIENTO</span>
+                        
+                        <h1 class="display-5 fw-bold text-white mb-2 text-truncate">${game.name.toUpperCase()}</h1>
+                        
+                        <p class="lead text-light mb-3 d-none d-md-block" style="color: var(--text-secondary) !important; font-size: 1.1rem; max-height: 60px; overflow: hidden;">
                             ${game.shortDescription || 'Un título espectacular que se suma a nuestro catálogo. ¡Descúbrelo ya!'}
                         </p>
+                        
                         <div class="d-flex gap-3">
-                            <a href="pages/detalle-juego.html?gameId=${game.id}" class="btn btn-accent px-4 py-2">Ver detalles</a>
-                            <button class="btn btn-outline-light px-4 py-2"><i class="bi bi-heart"></i> Agregar a deseos</button>
+                            <a href="pages/detalle-juego.html?gameId=${game.id}" class="btn btn-sm btn-accent px-4 py-2 fw-bold">Ver detalles</a>
                         </div>
                     </div>
                 </div>
@@ -140,6 +162,7 @@ function configurarCarruselInizial(juegosCarrusel) {
         `;
     });
 }
+
 async function cargarOfertasIndex() {
     const offersGrid = document.getElementById('games-offers-grid');
     if (!offersGrid) return;
@@ -147,13 +170,15 @@ async function cargarOfertasIndex() {
     offersGrid.innerHTML = '<div class="text-center w-100 py-4"><span class="spinner-border text-success"></span> Buscando ofertas...</div>';
 
     try {
-        const response = await fetch(`${API_BASE_URL}/Game/GET/games?onOffer=true&page=1&pageSize=10&sortBy`);
+        // 💡 Corrección: Eliminado el "&sortBy" vacío del final
+        const response = await fetch(`${API_BASE_URL}/Game/GET/games?onOffer=true&page=1&pageSize=10`);
         if (!response.ok) throw new Error("No se pudieron cargar las ofertas.");
 
         const data = await response.json();
         const juegos = Array.isArray(data) ? data : (data.items || []);
 
-        const juegosEnOferta = juegos.filter(j => j.onOffer === true || juego.discountPercentage > 0);
+        // 💡 Corrección: "juego" cambiado por "j" para que coincida con el parámetro del filter
+        const juegosEnOferta = juegos.filter(j => j.onOffer === true || j.discountPercentage > 0);
 
         offersGrid.innerHTML = '';
 
@@ -179,9 +204,11 @@ async function cargarOfertasIndex() {
                 </div>
             `;
 
-            const categoriaBadge = juego.categoria 
-                ? `<span class="badge bg-secondary mb-1 text-uppercase" style="font-size: 0.65rem;">${juego.categoria.descripcion}</span>` 
+            // 💡 Corrección: Adaptado al array 'categories' que devuelve el DTO de C#
+            const categoriaBadge = (juego.categories && juego.categories.length > 0)
+                ? `<span class="badge bg-secondary mb-1 text-uppercase" style="font-size: 0.65rem;">${juego.categories[0].description}</span>` 
                 : '';
+                
             const cardHTML = `
                 <div class="col-10 col-sm-6 col-md-4 col-lg-3 flex-shrink-0">
                     <div class="card h-100 bg-dark border-secondary game-card shadow-sm">

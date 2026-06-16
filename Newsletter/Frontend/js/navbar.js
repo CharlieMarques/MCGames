@@ -41,26 +41,22 @@ function renderizarNavbar() {
     const enRaiz = window.location.pathname.endsWith('/') || window.location.pathname.endsWith('index.html');
     const prefijo = enRaiz ? './pages/' : './';
     const linkInicio = enRaiz ? '#' : '../index.html';
-
-    const navbarContainer = document.getElementById('navbar-container');
-    
+    const rutaLogo = enRaiz ? './assets/icons/Logo.svg' : '../assets/icons/Logo.svg';
+    const navbarContainer = document.getElementById('navbar-container');   
     if (!navbarContainer) return; 
 
     navbarContainer.innerHTML = `
         <nav class="navbar navbar-expand-lg navbar-dark bg-dark border-bottom border-secondary sticky-top">
             <div class="container">
-                <!-- Logo -->
-                <a class="navbar-brand d-flex align-items-center gap-2" href="${linkInicio}">
-                    <i class="bi bi-play-fill fs-3" style="color: var(--accent-secondary);"></i>
+                <a class="navbar-brand d-flex align-items-center gap-2" href="${linkInicio}">               
+                    <img src="${rutaLogo}" alt="Logo MCGames" width="32" height="32" class="me-2">
                     <span class="fw-bold">MCGames</span>
                 </a>
 
-                <!-- Botón móvil -->
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                     <span class="navbar-toggler-icon"></span>
                 </button>
 
-                <!-- Enlaces -->
                 <div class="collapse navbar-collapse" id="navbarNav">
                     <ul class="navbar-nav me-auto">
                         <li class="nav-item">
@@ -79,18 +75,14 @@ function renderizarNavbar() {
                 </div>
             </form>
 
-                    <!-- Botones de Autenticación (Se controlan con JS) -->
                     <div class="d-flex gap-3 align-items-center">
-                        <!-- ESTADO INVITADO -->
                         <div id="nav-guest" class="d-flex gap-2">
                             <a href="${prefijo}login.html" class="btn btn-outline-accent">Iniciar Sesión</a>
                             <a href="${prefijo}registro.html" class="btn btn-accent">Registrarse</a>
                         </div>
 
-                        <!-- ESTADO USUARIO -->
                         <div id="nav-user" class="d-flex gap-3 align-items-center d-none">
-                                        <!-- Enlace al perfil -->
-                        <a href="${prefijo}perfil.html" class="text-light text-decoration-none fw-bold text-truncate"
+                                        <a href="${prefijo}perfil.html" class="text-light text-decoration-none fw-bold text-truncate"
                             style="max-width: 150px;">
                             <i class="bi bi-person-circle text-accent me-1"></i>
                             <span id="nav-username"></span>

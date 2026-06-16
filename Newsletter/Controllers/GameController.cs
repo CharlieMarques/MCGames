@@ -30,6 +30,7 @@ namespace Newsletter.Controllers
             [FromQuery] bool? onOffer,
             [FromQuery] List<int>? genreIds,
             [FromQuery] List<int>? categoryIds,
+            [FromQuery] string? store,
             [FromQuery] string? sortBy,
             [FromQuery] int page =1,
             [FromQuery] int pageSize =10)
@@ -49,16 +50,17 @@ namespace Newsletter.Controllers
             {
                 sortBy = "name_asc";
             }
-            var games = await _gameService.GetGamesAsync(id, name, stateFinal,onOffer,genreIds,categoryIds,sortBy,page,pageSize);
+            var games = await _gameService.GetGamesAsync(id, name, stateFinal,onOffer,genreIds,categoryIds,store,sortBy,page,pageSize);
             return Ok(games);
         }
 
         [HttpGet("GET/MultiplatformGames")]
-        public async Task<IActionResult> GetJuegosMultiplataforma()
+        public async Task<IActionResult> GetJuegosMultiplataforma(
+            [FromQuery] int page =1,
+            [FromQuery] int pageSize = 10)
         {
             try
             {
-                // 💡 Buscamos los juegos que tienen cargados datos de Steam Y de Epic al mismo tiempo
                 var juegosCruzados = await _gameService.GetMultiPlatformGamesAsync();
 
                 return Ok(juegosCruzados);

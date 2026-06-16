@@ -3,8 +3,9 @@ let currentPage = 1;
 const pageSize = 24;
 let currentSearchTerm = '';
 let selectedGenres = [];
-let currentSort = 'name_asc';
+let currentSort = 'releasedate_desc';
 let soloOfertas = false;
+let soloAmbasPlataformas = false;
 
 document.addEventListener('DOMContentLoaded', () => {
     if (typeof renderizarNavbar === 'function') renderizarNavbar();
@@ -114,6 +115,13 @@ function actualizarFiltroOfertas() {
         cargarCatalogo(1);
     }
 }
+function actualizarFiltroPlataformas() {
+    const checkbox = document.getElementById('filter-both-stores');
+    if (checkbox) {
+        soloAmbasPlataformas = checkbox.checked;
+        cargarCatalogo(1);
+    }
+}
 function cambiarOrden() {
     const select = document.getElementById('sort-select');
     if (select) {
@@ -132,8 +140,14 @@ async function cargarCatalogo(page) {
 
     try {
         let url = `${API_BASE_URL}/Game/GET/games?page=${currentPage}&pageSize=${pageSize}&sortBy=${currentSort}`;
+        
         if (soloOfertas) {
             url += `&onOffer=true`;
+        }
+
+        // 💡 NUEVO: Inyectamos el parámetro si el check está marcado
+        if (soloAmbasPlataformas) {
+            url += `&store=both`;
         }
 
         if (currentSearchTerm && currentSearchTerm.trim() !== '') {
@@ -174,40 +188,72 @@ async function cargarCatalogo(page) {
 
             let precioHTML = '';
 
-            if (juego.onOffer && juego.discountPercentage > 0) {
+            // 💡 LÓGICA DE DIBUJADO DE PRECIOS
+            if (soloAmbasPlataformas && juego.epicStoreId) {
+                // DISEÑO MULTIPLATAFORMA COMPACTO (Se activa solo cuando el usuario busca "Steam y Epic")
+                
+                // Formateo rápido para Steam
+                let steamP = juego.price === 0 ? '<span class="text-success">Gratis</span>' : `USD ${juego.finalPrice.toFixed(2)}`;
+                if (juego.onOffer && juego.discountPercentage > 0) {
+                    steamP = `<span class="text-success">USD ${juego.finalPrice.toFixed(2)}</span> <span class="badge bg-success ms-1" style="font-size:0.6rem">-${juego.discountPercentage}%</span>`;
+                }
+
+                // Formateo rápido para Epic
+                let epicP = juego.epicPrice === 0 ? '<span class="text-success">Gratis</span>' : `USD ${juego.epicFinalPrice.toFixed(2)}`;
+                if (juego.epicOnOffer && juego.epicDiscountPercentage > 0) {
+                    epicP = `<span class="text-success">USD ${juego.epicFinalPrice.toFixed(2)}</span> <span class="badge bg-success ms-1" style="font-size:0.6rem">-${juego.epicDiscountPercentage}%</span>`;
+                }
+
                 precioHTML = `
-            <div class="d-flex flex-column text-start">
-                <span class="text-secondary text-decoration-line-through x-small" style="font-size: 0.75rem;">
-                    USD ${juego.price.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                </span>
-                <div class="d-flex align-items-center gap-1">
-                    <span class="badge bg-success font-monospace p-1" style="font-size: 0.65rem;">-${juego.discountPercentage}%</span>
-                    <span class="text-white fw-bold small">
-                        USD ${juego.finalPrice.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                    </span>
-                </div>
-            </div>
-        `;
-            } else {
-                precioHTML = juego.price > 0
-                    ? `<span class="text-light fw-bold mini-card-price">USD ${juego.price.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>`
-                    : `<span class="text-success fw-bold mini-card-price">Gratis</span>`;
-            }
-            const cardHTML = `
-        <div class="col-12 col-sm-6 col-lg-4 col-xl-3">
-            <div class="card h-100 bg-dark border-secondary game-card shadow-sm">
-                <a href="detalle-juego.html?gameId=${juego.id}" class="text-decoration-none">
-                    <img src="${imageUrl}" class="card-img-top mini-card-img" alt="${juego.name}">
-                    <div class="card-body p-2 d-flex flex-column">
-                        <h6 class="card-title text-white fw-bold text-truncate mini-card-title" title="${juego.name}">${juego.name}</h6>
-                        <div class="mt-auto d-flex justify-content-between align-items-center pt-2 border-top border-secondary">
-                            ${precioHTML}
+                    <div class="w-100 d-flex flex-column gap-1" style="font-size: 0.75rem;">
+                        <div class="d-flex justify-content-between border-bottom border-secondary pb-1">
+                            <span class="text-secondary"><i class="bi bi-steam me-1 text-white"></i>Steam</span>
+                            <span class="text-light fw-bold">${steamP}</span>
+                        </div>
+                        <div class="d-flex justify-content-between">
+                            <span class="text-secondary"><i class="bi bi-controller me-1 text-info"></i>Epic</span>
+                            <span class="text-light fw-bold">${epicP}</span>
                         </div>
                     </div>
-                </a>
-            </div>
-        </div>
-    `;
+                `;
+            } else {
+                // DISEÑO TRADICIONAL DE STEAM (Se mantiene igual para cuando el filtro no está activo)
+                if (juego.onOffer && juego.discountPercentage > 0) {
+                    precioHTML = `
+                        <div class="d-flex flex-column text-start">
+                            <span class="text-secondary text-decoration-line-through x-small" style="font-size: 0.75rem;">
+                                USD ${juego.price.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                            </span>
+                            <div class="d-flex align-items-center gap-1">
+                                <span class="badge bg-success font-monospace p-1" style="font-size: 0.65rem;">-${juego.discountPercentage}%</span>
+                                <span class="text-white fw-bold small">
+                                    USD ${juego.finalPrice.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                </span>
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    precioHTML = juego.price > 0
+                        ? `<span class="text-light fw-bold mini-card-price">USD ${juego.price.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>`
+                        : `<span class="text-success fw-bold mini-card-price">Gratis</span>`;
+                }
+            }
+
+            const cardHTML = `
+                <div class="col-12 col-sm-6 col-lg-4 col-xl-3">
+                    <div class="card h-100 bg-dark border-secondary game-card shadow-sm">
+                        <a href="detalle-juego.html?gameId=${juego.id}" class="text-decoration-none">
+                            <img src="${imageUrl}" class="card-img-top mini-card-img" alt="${juego.name}">
+                            <div class="card-body p-2 d-flex flex-column">
+                                <h6 class="card-title text-white fw-bold text-truncate mini-card-title" title="${juego.name}">${juego.name}</h6>
+                                <div class="mt-auto d-flex justify-content-between align-items-center pt-2 border-top border-secondary">
+                                    ${precioHTML}
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+            `;
             grid.innerHTML += cardHTML;
         });
 

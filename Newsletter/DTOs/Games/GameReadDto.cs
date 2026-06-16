@@ -19,6 +19,12 @@ namespace Newsletter.DTOs.Games
         public decimal FinalPrice { get; set; }
         public int? SteamAppId { get; set; }
 
+        public string? EpicStoreId { get; set; }
+        public decimal? EpicPrice { get; set; }
+        public decimal? EpicFinalPrice { get; set; }
+        public int? EpicDiscountPercentage { get; set; }
+        public bool? EpicOnOffer { get; set; }
+
         public List<CategoryReadDto>? Categories { get; set; }
         public List<GenreDto>? Genres { get; set; }
         public List<PlatformDto>? Platforms {  get; set; }

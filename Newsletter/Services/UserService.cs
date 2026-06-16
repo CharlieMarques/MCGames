@@ -2,6 +2,7 @@
 using Microsoft.IdentityModel.Tokens;
 using Newsletter.DTOs.Users;
 using Newsletter.Models;
+using Newsletter.Repositories;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
@@ -14,12 +15,17 @@ namespace Newsletter.Services
         private readonly RoleManager<IdentityRole> _roleManager;
         private readonly IConfiguration _configuration;
         private readonly ILibraryService _libraryService;
-        public UserService(UserManager<User> userManager, RoleManager<IdentityRole> roleManager, IConfiguration configuration, ILibraryService libraryService)
+        private readonly IPasswordHasher<User> _passwordHasher;
+        private readonly IUserRepository _userRepository;
+        public UserService(UserManager<User> userManager, RoleManager<IdentityRole> roleManager,
+            IConfiguration configuration, ILibraryService libraryService, IUserRepository userRepository, IPasswordHasher<User> passwordHasher)
         {
             _userManager = userManager;
             _roleManager = roleManager;
             _configuration = configuration;
             _libraryService = libraryService;
+            _userRepository = userRepository;
+            _passwordHasher = passwordHasher;
         }
         public async Task<(bool success, IEnumerable<string> Errors)> AssignRoleAsycn(UserRoleDto dto)
         {
@@ -38,6 +44,24 @@ namespace Newsletter.Services
                 return (true, Array.Empty<string>());
             }
             return (false, result.Errors.Select(e =>  e.Description));
+        }
+
+        public async Task<(bool success, string errorMessage)> ChangePasswordAsync(string userId, UserChangePasswordDto dto)
+        {
+            var user = await _userRepository.GetbyIdAsync(userId);
+            if (user == null)
+                return (false, "Usuario no encontrado");
+
+            var verificationResult = _passwordHasher.VerifyHashedPassword(user, user.PasswordHash, dto.CurrentPassword);
+            if (verificationResult == PasswordVerificationResult.Failed)
+                return (false, "Contraseña actual incorrecta");
+            user.PasswordHash = _passwordHasher.HashPassword(user, dto.NewPassword);
+            var updateResult = await _userRepository.UpdateAsync(user);
+            if(!updateResult)
+            {
+                return (false, "Error al actualizar la contraseña");
+            }
+            return (true, string.Empty);
         }
 
         public async Task<(bool success, string Token, string ErrorMessage)> LoginAsync(UserLoginDto dto)
@@ -83,6 +107,8 @@ namespace Newsletter.Services
             var errors = result.Errors.Select(e => e.Description);
             return (false, errors);
         }
+
+
 
         private async Task<string>GenerateTokenJWT(User user)
         {

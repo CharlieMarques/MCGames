@@ -135,5 +135,43 @@ namespace Newsletter.Controllers
                 return StatusCode(500, $"Error al procesar el lote manual: {ex.Message}");
             }
         }
+
+        /* [HttpPost("ejecutar-automatizacion")]
+         public async Task<IActionResult> RunEpicBot([FromQuery] int desdePagina = 6, [FromQuery] int cuantasPaginas = 3)
+         {
+             try
+             {
+                 var botService = new EpicImportService(_dbContext);
+                 // 🚀 Ejecutamos el bot y atrapamos el reporte completo de diagnóstico
+                  var resultadoReporte1 = await botService.AutomatizarCargaEpicAsync(desdePagina, cuantasPaginas);                
+                  //var resultadoReporte = await botService.AutomatizarCargaEpicAsync(desdePagina, cuantasPaginas);
+                 return Ok(resultadoReporte1);
+             }
+             catch (Exception ex)
+             {
+                 return StatusCode(500, new { Error = $"Fallo crítico en el hilo del bot: {ex.Message}" });
+             }
+         }
+         [HttpPost("recuperar-paginas-caidas")]
+         public async Task<IActionResult> RecuperarPaginasEpic([FromBody] List<int> paginasFallidas)
+         {
+             try
+             {
+                 if (paginasFallidas == null || !paginasFallidas.Any())
+                     return BadRequest("Debes enviar al menos una página en la lista.");
+
+                 var botService = new EpicImportService(_dbContext);
+
+                 // Llamamos al método nuevo
+                 var resultadoReporte = await botService.RecuperarPaginasCaidasAsync(paginasFallidas);
+
+                 return Ok(resultadoReporte);
+             }
+             catch (Exception ex)
+             {
+                 return StatusCode(500, new { Error = $"Fallo crítico en el rescate: {ex.Message}" });
+             }
+         }
+     }*/
     }
 }
