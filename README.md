@@ -80,7 +80,7 @@ El backend está desarrollado bajo los lineamientos de una arquitectura limpia e
 Actualmente este proyecto esta en MVP 
 🔮 Futuras Mejoras (Roadmap)
 
-    Implementación de filtros avanzados (por género, precio máximo, etc.).
+    Implementación de filtros avanzados.
 
     Paginación dinámica optimizada en el lado del cliente.
 
