@@ -65,7 +65,7 @@ El backend está desarrollado bajo los lineamientos de una arquitectura limpia e
 * **Seguridad Stateless (JWT):** La autenticación se maneja mediante JSON Web Tokens, permitiendo una comunicación segura entre la API y el cliente sin necesidad de mantener sesiones activas en el servidor.
 
 ### Estructura de Carpetas Principal
-\`\`\`text
+<pre>
 📁 Directorio del Proyecto/
  ┣ 📂 Controllers/    # Endpoints de la API REST
  ┣ 📂 Data/           # Contexto de la base de datos (DbContext)
@@ -75,7 +75,7 @@ El backend está desarrollado bajo los lineamientos de una arquitectura limpia e
  ┣ 📂 Models/         # Entidades de dominio que representan las tablas de SQL
  ┣ 📂 Repositories/   # Abstracción de acceso a datos (Patrón Repositorio)
  ┗ 📂 Services/       # Lógica de negocio y tareas automáticas en segundo plano
-\`\`\`
+</pre>
 
 Actualmente este proyecto esta en MVP 
 🔮 Futuras Mejoras (Roadmap)
