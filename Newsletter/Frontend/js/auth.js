@@ -42,7 +42,6 @@ async function handleRegister(event) {
     btnSubmit.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Registrando...';
 
     try {
-        // 5. Llamada a tu API (Ajusta 'Auth/Register' según tu controlador en C#)
         const response = await fetch(`${API_BASE_URL}/Auth/Register`, {
             method: 'POST',
             headers: {

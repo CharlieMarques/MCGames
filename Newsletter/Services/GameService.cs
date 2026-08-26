@@ -31,7 +31,7 @@ namespace Newsletter.Services
                 throw new ArgumentException("Uno o más géneros proporcionados no existen");
             }
             bool platformValid = await _platformRepository.AllExistAsync(dto.PlatformsIds);
-            if(!platformValid)
+            if (!platformValid)
             {
                 throw new ArgumentException("Una o más plataformas proporcionadas no existen");
             }
@@ -93,10 +93,11 @@ namespace Newsletter.Services
         }
 
         public async Task<PagedResult<GameReadDto>> GetGamesAsync(Guid? id,
-            string? name, bool? state,bool? onOffer,
-            List<int>? genreIds,List<int>categoryIds,
+            string? name, bool? state, bool? onOffer,
+
+            List<int>? genreIds, List<int> categoryIds,
             string? store,
-            string sortBy,int page, int pageSize)
+            string sortBy, int discount, int page, int pageSize)
         {
             var query = _repository.GetQueryable();
             if (id.HasValue)
@@ -113,29 +114,55 @@ namespace Newsletter.Services
             {
                 query = query.Where(g => g.State == state.Value);
             }
-            if(onOffer.HasValue)
+            bool searchInBoth = !string.IsNullOrEmpty(store) && store.ToLower() == "both";
+            bool searchInEpicOnly = !string.IsNullOrEmpty(store) && store.ToLower() == "epic";
+            if(searchInEpicOnly && !id.HasValue)
+            {               
+                query = query.Where(g => g.EpicData.EpicStoreId != null && g.SteamAppId ==null);
+                if (onOffer.HasValue)
+                {
+                    query = query.Where(g => g.EpicData.EpicOnOffer == onOffer.Value);
+                }
+                if (discount > 0)
+                {
+                    query = query.Where(g => g.EpicData.EpicDiscountPercentage >= discount);
+                }
+            }
+            if (searchInBoth && !id.HasValue)
+            {
+                query = query.Where(g => g.SteamAppId != null && g.EpicData != null);
+                if(onOffer.HasValue)
+                {
+                    query = query.Where(g => g.OnOffer == onOffer.Value || g.EpicData.EpicOnOffer == onOffer.Value);
+                }
+                if (discount > 0)
+                {
+                    query = query.Where(g => g.DiscountPercentage >= discount || g.EpicData.EpicDiscountPercentage >= discount);
+                }
+            }
+            else if (onOffer.HasValue)
             {
                 query = query.Where(g => g.OnOffer == onOffer.Value);
+                if (discount > 0)
+                {
+                    query = query.Where(g => g.DiscountPercentage >= discount);
+                }
             }
-            if(genreIds != null && genreIds.Any())
+
+            if (genreIds != null && genreIds.Any())
             {
                 query = query.Where(g => g.GameGenre.Any(gg => genreIds.Contains(gg.Genre.Id)));
             }
-            if(categoryIds != null  && categoryIds.Any())
+            if (categoryIds != null && categoryIds.Any())
             {
                 query = query.Where(g => g.GameCategories.Any(gc => categoryIds.Contains(gc.CategoryId)));
             }
-            if(sortBy == "releasedate_desc")
+            if (sortBy == "releasedate_desc")
             {
                 var hoy = DateTime.UtcNow;
                 query = query.Where(g => g.ReleaseDate <= hoy);
             }
-            bool searchInBoth = !string.IsNullOrEmpty(store) && store.ToLower()=="both";
-            if(searchInBoth && !id.HasValue)
-            {
-                query = query.Where(g => g.SteamAppId != null && g.EpicData != null);
-            }
-            bool includeDataEpic = searchInBoth || id.HasValue;
+            bool includeDataEpic = searchInBoth || id.HasValue || searchInEpicOnly;
             query = sortBy switch
             {
                 "price_asc" => query.OrderBy(g => g.Price),
@@ -143,85 +170,86 @@ namespace Newsletter.Services
                 "name_desc" => query.OrderByDescending(g => g.Name),
                 "date_desc" => query.OrderByDescending(g => g.ReleaseDate),
                 "releasedate_desc" => query.OrderByDescending(g => g.ReleaseDate),
-                _ => query.OrderBy(g => g.Name)             
+                _ => query.OrderBy(g => g.Name)
             };
             int totalRecords = await query.CountAsync();
             var items = new List<GameReadDto>();
             int totalPages = (int)Math.Ceiling(totalRecords / (double)pageSize);
-            if(includeDataEpic)
+            if (includeDataEpic)
             {
                 items = await query
-                    .Skip((page-1)*pageSize)
+                    .Skip((page - 1) * pageSize)
                     .Take(pageSize)
                     .Select(g => new GameReadDto
-                {
-                    Id = g.Id,
-                    Name = g.Name,
-                    State = g.State,
-                    SteamAppId = g.SteamAppId,
-                    ShortDescription = g.ShortDescription,
-                    ReleaseDate = g.ReleaseDate,
-                    GameCoverUrl = g.GameCoverUrl,
-                    Price = g.Price,
-                    OnOffer = g.OnOffer,
-                    DiscountPercentage = g.DiscountPercentage,
-                    FinalPrice = g.FinalPrice,
-                  
-                    EpicStoreId = g.EpicData.EpicStoreId,
-                    EpicPrice = g.EpicData.EpicPrice,
-                    EpicFinalPrice = g.EpicData.EpicFinalPrice,
-                    EpicDiscountPercentage = g.EpicData.EpicDiscountPercentage,
-                    EpicOnOffer = g.EpicData.EpicOnOffer,
+                    {
+                        Id = g.Id,
+                        Name = g.Name,
+                        State = g.State,
+                        SteamAppId = g.SteamAppId,
+                        ShortDescription = g.ShortDescription,
+                        ReleaseDate = g.ReleaseDate,
+                        GameCoverUrl = g.GameCoverUrl,
+                        Price = g.Price,
+                        OnOffer = g.OnOffer,
+                        DiscountPercentage = g.DiscountPercentage,
+                        FinalPrice = g.FinalPrice,
 
-                    Categories = g.GameCategories.Select(gc => new CategoryReadDto { Id = gc.Category.Id, Description = gc.Category.Description }).ToList(),
-                    Genres = g.GameGenre.Select(gg => new GenreDto { Id = gg.Genre.Id, Description = gg.Genre.Description }).ToList(),
-                    Platforms = g.GamePlatforms.Select(gp => new PlatformDto { Id = gp.Platform.Id, Description = gp.Platform.Description }).ToList()
-                }).ToListAsync();
+                        EpicStoreId = g.EpicData.EpicStoreId,
+                        EpicPrice = g.EpicData.EpicPrice,
+                        EpicFinalPrice = g.EpicData.EpicFinalPrice,
+                        EpicDiscountPercentage = g.EpicData.EpicDiscountPercentage,
+                        EpicOnOffer = g.EpicData.EpicOnOffer,
+                        PageSlug = g.EpicData.PageSlug,
+
+                        Categories = g.GameCategories.Select(gc => new CategoryReadDto { Id = gc.Category.Id, Description = gc.Category.Description }).ToList(),
+                        Genres = g.GameGenre.Select(gg => new GenreDto { Id = gg.Genre.Id, Description = gg.Genre.Description }).ToList(),
+                        Platforms = g.GamePlatforms.Select(gp => new PlatformDto { Id = gp.Platform.Id, Description = gp.Platform.Description }).ToList()
+                    }).ToListAsync();
             }
             else
             {
 
-               items = await query
+                items = await query
 
-                        .Skip((page - 1) * pageSize)
-                        .Take(pageSize)
-                  .Select(g => new GameReadDto
-                  {
-                      Id = g.Id,
-                      Name = g.Name,
-                      State = g.State,
-                      SteamAppId = g.SteamAppId,
-                      ShortDescription = g.ShortDescription,
-                      ReleaseDate = g.ReleaseDate,
-                      GameCoverUrl = g.GameCoverUrl,
-                      Price = g.Price,
-                      OnOffer = g.OnOffer,
-                      DiscountPercentage = g.DiscountPercentage,
-                      FinalPrice = g.FinalPrice,
+                         .Skip((page - 1) * pageSize)
+                         .Take(pageSize)
+                   .Select(g => new GameReadDto
+                   {
+                       Id = g.Id,
+                       Name = g.Name,
+                       State = g.State,
+                       SteamAppId = g.SteamAppId,
+                       ShortDescription = g.ShortDescription,
+                       ReleaseDate = g.ReleaseDate,
+                       GameCoverUrl = g.GameCoverUrl,
+                       Price = g.Price,
+                       OnOffer = g.OnOffer,
+                       DiscountPercentage = g.DiscountPercentage,
+                       FinalPrice = g.FinalPrice,
 
-                      Categories = g.GameCategories.Select(gc => new CategoryReadDto
-                      {
-                          Id = gc.Category.Id,
-                          Description = gc.Category.Description
-                      })
-                      .ToList(),
+                       Categories = g.GameCategories.Select(gc => new CategoryReadDto
+                       {
+                           Id = gc.Category.Id,
+                           Description = gc.Category.Description
+                       })
+                       .ToList(),
 
-                      Genres = g.GameGenre.Select(gg => new GenreDto
-                      {
-                          Id = gg.Genre.Id,
-                          Description = gg.Genre.Description
-                      }).ToList(),
+                       Genres = g.GameGenre.Select(gg => new GenreDto
+                       {
+                           Id = gg.Genre.Id,
+                           Description = gg.Genre.Description
+                       }).ToList(),
 
-                      Platforms = g.GamePlatforms.Select(gp => new PlatformDto
-                      {
-                          Id = gp.Platform.Id,
-                          Description = gp.Platform.Description
-                      }).ToList(),
-                      TotalReviews = 0,
-                      AverageRating = 0
-                  })
+                       Platforms = g.GamePlatforms.Select(gp => new PlatformDto
+                       {
+                           Id = gp.Platform.Id,
+                           Description = gp.Platform.Description
+                       }).ToList(),
+                       TotalReviews = 0,
+                       AverageRating = 0
+                   })
 
-                  .ToListAsync();
+                   .ToListAsync();
             }
             return new PagedResult<GameReadDto>
             {

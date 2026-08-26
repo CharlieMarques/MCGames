@@ -8,7 +8,6 @@ document.addEventListener('DOMContentLoaded', () => {
     renderizarNavbar();
     verificarEstadoAuth();
 
-    // 1. SEGURIDAD: Verificar que sea Admin
     const token = localStorage.getItem('jwtToken');
     if (!token) {
         window.location.href = 'login.html';
@@ -44,7 +43,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 function buscarJuegoAdmin() {
     adminSearchTerm = document.getElementById('admin-search-game').value.trim();
-    cargarJuegosAdmin(1); // Siempre que buscamos algo nuevo, volvemos a la página 1
+    cargarJuegosAdmin(1); 
 }
 
 async function cargarJuegosAdmin(page = 1) {
@@ -136,7 +135,6 @@ function dibujarPaginacionAdmin(totalPages) {
             if (i - l === 2) {
                 rangeWithDots.push(l + 1);
             } else if (i - l !== 1) {
-                // Si el salto es mayor, ponemos los puntos
                 rangeWithDots.push('...');
             }
         }

@@ -19,8 +19,8 @@ namespace Newsletter.Controllers
         public UserController(IUserService userService)
         {
             _userSErvice = userService;
-        }
-
+        }   
+        [Authorize]
         [HttpPatch("Change-Password")]
         public async Task<IActionResult> ChangePassword([FromBody] UserChangePasswordDto dto)
         {

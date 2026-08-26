@@ -13,6 +13,7 @@ namespace Newsletter.Models
         public int EpicDiscountPercentage { get; set; }
         public bool EpicOnOffer { get; set; }
         public DateTime? LastPriceCheck { get; set; }
+        public string? PageSlug { get; set; }
         [ForeignKey("GameId")]
         public virtual Game Game { get; set; } = null!;
     }

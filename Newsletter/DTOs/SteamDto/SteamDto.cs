@@ -1,11 +1,13 @@
-﻿using System.Text.Json.Serialization;
+﻿using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace Newsletter.DTOs.SteamDto
 {
     public class SteamGameWrapper
     {
         [JsonPropertyName("success")] public bool Success { get; set; }
-        [JsonPropertyName("data")] public SteamGameData Data { get; set; }
+        //[JsonPropertyName("data")] public SteamGameData Data { get; set; }
+        [JsonPropertyName("data")] public JsonElement Data { get; set; }
     }
 
     public class SteamGameData

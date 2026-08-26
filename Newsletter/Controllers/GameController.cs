@@ -32,6 +32,7 @@ namespace Newsletter.Controllers
             [FromQuery] List<int>? categoryIds,
             [FromQuery] string? store,
             [FromQuery] string? sortBy,
+            [FromQuery] int discount =0,
             [FromQuery] int page =1,
             [FromQuery] int pageSize =10)
         {
@@ -50,7 +51,7 @@ namespace Newsletter.Controllers
             {
                 sortBy = "name_asc";
             }
-            var games = await _gameService.GetGamesAsync(id, name, stateFinal,onOffer,genreIds,categoryIds,store,sortBy,page,pageSize);
+            var games = await _gameService.GetGamesAsync(id, name, stateFinal,onOffer,genreIds,categoryIds,store,sortBy,discount, page,pageSize);
             return Ok(games);
         }
 

@@ -12,7 +12,6 @@ async function cargarContenidoInicial() {
 
     try {
         const [responseJuegos, responseCarrusel] = await Promise.all([
-            // 💡 Solicitamos los juegos que están en ambas plataformas
             fetch(`${API_BASE_URL}/Game/GET/games?store=both&page=1&pageSize=10`), 
             fetch(`${API_BASE_URL}/Game/GET/games?sortBy=releasedate_desc&page=1&pageSize=3`) 
         ]);
@@ -38,7 +37,6 @@ async function cargarContenidoInicial() {
         juegosGrid.forEach(juego => {
             const imageUrl = juego.gameCoverUrl || 'https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&w=800&q=80';
             
-            // 💰 Lógica Visual de Precios para Steam
             let steamHTML = '<span class="text-muted small">No disp.</span>';
             if (juego.steamAppId) {
                 if (juego.price === 0) {
@@ -170,14 +168,12 @@ async function cargarOfertasIndex() {
     offersGrid.innerHTML = '<div class="text-center w-100 py-4"><span class="spinner-border text-success"></span> Buscando ofertas...</div>';
 
     try {
-        // 💡 Corrección: Eliminado el "&sortBy" vacío del final
         const response = await fetch(`${API_BASE_URL}/Game/GET/games?onOffer=true&page=1&pageSize=10`);
         if (!response.ok) throw new Error("No se pudieron cargar las ofertas.");
 
         const data = await response.json();
         const juegos = Array.isArray(data) ? data : (data.items || []);
 
-        // 💡 Corrección: "juego" cambiado por "j" para que coincida con el parámetro del filter
         const juegosEnOferta = juegos.filter(j => j.onOffer === true || j.discountPercentage > 0);
 
         offersGrid.innerHTML = '';
@@ -203,8 +199,6 @@ async function cargarOfertasIndex() {
                     </div>
                 </div>
             `;
-
-            // 💡 Corrección: Adaptado al array 'categories' que devuelve el DTO de C#
             const categoriaBadge = (juego.categories && juego.categories.length > 0)
                 ? `<span class="badge bg-secondary mb-1 text-uppercase" style="font-size: 0.65rem;">${juego.categories[0].description}</span>` 
                 : '';

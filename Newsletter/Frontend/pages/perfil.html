@@ -91,24 +91,45 @@
                                 </div>
                             </div>
 
-                            <h5 class="text-accent border-bottom border-secondary pb-2 mb-4 mt-5">Seguridad</h5>
-                            
-                            <button type="button" class="btn btn-outline-secondary mb-3" id="btn-toggle-password">
-                                <i class="bi bi-key-fill me-2"></i> Cambiar Contraseña
-                            </button>
+            <h5 class="text-accent border-bottom border-secondary pb-2 mb-4 mt-5">Seguridad</h5>
 
-                            <div id="password-section" class="d-none bg-secondary bg-opacity-10 p-3 rounded border border-secondary mb-4">
-                                <div class="row g-3">
-                                    <div class="col-md-6">
-                                        <label class="form-label text-light small">Nueva Contraseña</label>
-                                        <input type="password" id="input-new-password" class="form-control bg-dark border-secondary text-light" placeholder="Min. 6 caracteres">
-                                    </div>
-                                    <div class="col-md-6">
-                                        <label class="form-label text-light small">Confirmar Contraseña</label>
-                                        <input type="password" id="input-confirm-password" class="form-control bg-dark border-secondary text-light" placeholder="Repite la contraseña">
-                                    </div>
-                                </div>
-                            </div>
+<button type="button" class="btn btn-outline-secondary mb-3" id="btn-toggle-password">
+    <i class="bi bi-key-fill me-2"></i> Cambiar Contraseña
+</button>
+
+<div id="password-section" class="d-none bg-secondary bg-opacity-10 p-3 rounded border border-secondary mb-4">
+    <div class="row g-3">
+        <div class="col-12">
+            <label class="form-label text-light small">Contraseña Actual</label>
+            <div class="input-group">
+                <input type="password" id="input-current-password" class="form-control bg-dark border-secondary text-light" placeholder="Ingresa tu contraseña actual">
+                <button class="btn btn-outline-secondary toggle-visibility" type="button" data-target="input-current-password">
+                    <i class="bi bi-eye-fill"></i>
+                </button>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <label class="form-label text-light small">Nueva Contraseña</label>
+            <div class="input-group">
+                <input type="password" id="input-new-password" class="form-control bg-dark border-secondary text-light" placeholder="Min. 6 caracteres">
+                <button class="btn btn-outline-secondary toggle-visibility" type="button" data-target="input-new-password">
+                    <i class="bi bi-eye-fill"></i>
+                </button>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <label class="form-label text-light small">Confirmar Contraseña</label>
+            <div class="input-group">
+                <input type="password" id="input-confirm-password" class="form-control bg-dark border-secondary text-light" placeholder="Repite la contraseña">
+                <button class="btn btn-outline-secondary toggle-visibility" type="button" data-target="input-confirm-password">
+                    <i class="bi bi-eye-fill"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
 
                             <hr class="border-secondary mt-5 mb-4">
                             

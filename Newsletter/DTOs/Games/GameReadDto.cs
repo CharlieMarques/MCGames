@@ -24,6 +24,7 @@ namespace Newsletter.DTOs.Games
         public decimal? EpicFinalPrice { get; set; }
         public int? EpicDiscountPercentage { get; set; }
         public bool? EpicOnOffer { get; set; }
+        public string? PageSlug { get; set; }
 
         public List<CategoryReadDto>? Categories { get; set; }
         public List<GenreDto>? Genres { get; set; }

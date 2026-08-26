@@ -6,6 +6,8 @@ let selectedGenres = [];
 let currentSort = 'releasedate_desc';
 let soloOfertas = false;
 let soloAmbasPlataformas = false;
+let soloEpic = false;
+let currentDiscount = 0;
 
 document.addEventListener('DOMContentLoaded', () => {
     if (typeof renderizarNavbar === 'function') renderizarNavbar();
@@ -122,6 +124,13 @@ function actualizarFiltroPlataformas() {
         cargarCatalogo(1);
     }
 }
+function actualizarFiltroEpic() {
+    const checkbox = document.getElementById('filter-epic-stores');
+    if (checkbox) {
+        soloEpic = checkbox.checked;
+        cargarCatalogo(1);
+    }
+}
 function cambiarOrden() {
     const select = document.getElementById('sort-select');
     if (select) {
@@ -130,6 +139,14 @@ function cambiarOrden() {
     }
 }
 
+function actualizarFiltroDescuento()
+{
+    const select = document.getElementById('filter-discount')
+    if(select){
+        currentDiscount = parseInt(select.value) || 0;
+        cargarCatalogo(1)
+    }
+}
 async function cargarCatalogo(page) {
     currentPage = page;
     const grid = document.getElementById('catalog-grid');
@@ -139,15 +156,21 @@ async function cargarCatalogo(page) {
     grid.innerHTML = '<div class="col-12 text-center py-5"><span class="spinner-border text-accent"></span> Buscando juegos...</div>';
 
     try {
+        currentSort = `name_asc`
         let url = `${API_BASE_URL}/Game/GET/games?page=${currentPage}&pageSize=${pageSize}&sortBy=${currentSort}`;
         
         if (soloOfertas) {
             url += `&onOffer=true`;
         }
 
-        // 💡 NUEVO: Inyectamos el parámetro si el check está marcado
+        if(currentDiscount >0){
+            url += `&discount=${currentDiscount}`;
+        }
         if (soloAmbasPlataformas) {
             url += `&store=both`;
+        }
+        else if(soloEpic){
+            url += `&store=epic`;
         }
 
         if (currentSearchTerm && currentSearchTerm.trim() !== '') {
@@ -188,17 +211,12 @@ async function cargarCatalogo(page) {
 
             let precioHTML = '';
 
-            // 💡 LÓGICA DE DIBUJADO DE PRECIOS
             if (soloAmbasPlataformas && juego.epicStoreId) {
-                // DISEÑO MULTIPLATAFORMA COMPACTO (Se activa solo cuando el usuario busca "Steam y Epic")
-                
-                // Formateo rápido para Steam
                 let steamP = juego.price === 0 ? '<span class="text-success">Gratis</span>' : `USD ${juego.finalPrice.toFixed(2)}`;
                 if (juego.onOffer && juego.discountPercentage > 0) {
                     steamP = `<span class="text-success">USD ${juego.finalPrice.toFixed(2)}</span> <span class="badge bg-success ms-1" style="font-size:0.6rem">-${juego.discountPercentage}%</span>`;
                 }
 
-                // Formateo rápido para Epic
                 let epicP = juego.epicPrice === 0 ? '<span class="text-success">Gratis</span>' : `USD ${juego.epicFinalPrice.toFixed(2)}`;
                 if (juego.epicOnOffer && juego.epicDiscountPercentage > 0) {
                     epicP = `<span class="text-success">USD ${juego.epicFinalPrice.toFixed(2)}</span> <span class="badge bg-success ms-1" style="font-size:0.6rem">-${juego.epicDiscountPercentage}%</span>`;
@@ -217,7 +235,6 @@ async function cargarCatalogo(page) {
                     </div>
                 `;
             } else {
-                // DISEÑO TRADICIONAL DE STEAM (Se mantiene igual para cuando el filtro no está activo)
                 if (juego.onOffer && juego.discountPercentage > 0) {
                     precioHTML = `
                         <div class="d-flex flex-column text-start">

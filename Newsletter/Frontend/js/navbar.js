@@ -107,7 +107,7 @@ function verificarEstadoAuth() {
 
     if (token) {
         let nombreReal = localStorage.getItem('username') || 'Gamer'; 
-        let esAdmin = false; // 💡 1. Preparamos la variable
+        let esAdmin = false;
 
         try {
             const payloadBase64 = token.split('.')[1];
@@ -142,8 +142,6 @@ function verificarEstadoAuth() {
                 `;
             }
         }
-
-        // Botón Logout Global
         if (btnLogout) {
             btnLogout.addEventListener('click', () => {
                 localStorage.removeItem('jwtToken');

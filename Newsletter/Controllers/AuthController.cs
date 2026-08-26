@@ -53,6 +53,17 @@ namespace Newsletter.Controllers
             });
         }
 
+        [HttpGet("ConfirmEmail")]
+        public async Task<IActionResult> ConfirmEmail([FromQuery] string userId, [FromQuery]string token)
+        {
+           var result = await _userService.ConfirmEmailAsync(userId, token);
+            if (result.success)
+            {
+                return Ok( result.message);
+            }
+            return BadRequest( result.message);
+        }
+
         
        [Authorize(Roles = "Admin")]
         [HttpPost("AssignRole")]

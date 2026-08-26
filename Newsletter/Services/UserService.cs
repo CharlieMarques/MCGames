@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.IdentityModel.Tokens;
 using Newsletter.DTOs.Users;
 using Newsletter.Models;
@@ -17,8 +18,9 @@ namespace Newsletter.Services
         private readonly ILibraryService _libraryService;
         private readonly IPasswordHasher<User> _passwordHasher;
         private readonly IUserRepository _userRepository;
+        private readonly IEmailService _emailService;
         public UserService(UserManager<User> userManager, RoleManager<IdentityRole> roleManager,
-            IConfiguration configuration, ILibraryService libraryService, IUserRepository userRepository, IPasswordHasher<User> passwordHasher)
+            IConfiguration configuration, ILibraryService libraryService, IUserRepository userRepository, IPasswordHasher<User> passwordHasher, IEmailService emailService)
         {
             _userManager = userManager;
             _roleManager = roleManager;
@@ -26,6 +28,7 @@ namespace Newsletter.Services
             _libraryService = libraryService;
             _userRepository = userRepository;
             _passwordHasher = passwordHasher;
+            _emailService = emailService;
         }
         public async Task<(bool success, IEnumerable<string> Errors)> AssignRoleAsycn(UserRoleDto dto)
         {
@@ -96,6 +99,11 @@ namespace Newsletter.Services
 
             if (result.Succeeded)
             {
+                var token = await _userManager.GenerateEmailConfirmationTokenAsync(newUser);
+                var encodedToken = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(token));
+                var  frontendUrl = _configuration["FrontendUrl:Url"];
+                var confirmationLink = $"{frontendUrl}/ConfirmEmail?userId={newUser.Id}&token={encodedToken}";
+                await _emailService.SendEmailConfirmationAsync(newUser.Email, confirmationLink);
                 await _userManager.AddToRoleAsync(newUser, "Usuario");
                 var libraryResult = await _libraryService.CreateLibraryAsync(newUser.Id.ToString());
                 if (!libraryResult.success)
@@ -108,7 +116,38 @@ namespace Newsletter.Services
             return (false, errors);
         }
 
+        public async Task<(bool success, string message)> ConfirmEmailAsync(string userId, string token)
+        {           
+            if (string.IsNullOrEmpty(userId) || string.IsNullOrEmpty(token))
+            {
+                return (false, "Faltan parámetros de confirmación.");
+            }
 
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user == null)
+            {
+                return (false, "Usuario no encontrado.");
+            }
+
+            try
+            {
+                var decodedTokenBytes = WebEncoders.Base64UrlDecode(token);
+                var decodedToken = Encoding.UTF8.GetString(decodedTokenBytes);
+
+                var result = await _userManager.ConfirmEmailAsync(user, decodedToken);
+
+                if (result.Succeeded)
+                {
+                    return (true, "Email confirmado exitosamente. Ya puedes iniciar sesión.");
+                }
+
+                return (false, "El token es inválido o ha expirado.");
+            }
+            catch (FormatException)
+            {
+                return (false, "El token de confirmación está corrupto.");
+            }
+        }
 
         private async Task<string>GenerateTokenJWT(User user)
         {

@@ -22,7 +22,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
 async function cargarDetallesDelJuego(gameId) {
     try {
-        // En tu backend, este endpoint de /games?id=... ya te devuelve el objeto del juego con los datos de Steam y Epic
         const response = await fetch(`${API_BASE_URL}/Game/GET/games?id=${gameId}&page=1&pageSize=10`);
 
         if (!response.ok) {
@@ -39,7 +38,6 @@ async function cargarDetallesDelJuego(gameId) {
         const juego = listaJuegos[0];
         const imageUrl = juego.gameCoverUrl || 'https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&w=800&q=80';
 
-        // 1. Fondos y Títulos
         const heroBg = document.getElementById('hero-background');
         if (heroBg) {
             heroBg.style.backgroundImage = `url('${imageUrl}')`;
@@ -61,12 +59,10 @@ async function cargarDetallesDelJuego(gameId) {
             document.getElementById('game-release').textContent = "Lanzamiento: Desconocido";
         }
 
-        // 💡 2. NUEVO: Lógica de Precios y Botones de Tiendas
+
         const pricesContainer = document.getElementById('game-prices-container');
         if (pricesContainer) {
-            pricesContainer.innerHTML = ''; // Limpiamos el estado inicial
-
-            // --- TARJETA DE STEAM ---
+            pricesContainer.innerHTML = ''; 
             if (juego.steamAppId) {
                 let steamPriceHTML = '';
                 if (juego.price === 0) {
@@ -100,8 +96,6 @@ async function cargarDetallesDelJuego(gameId) {
                     </div>
                 `;
             }
-
-            // --- TARJETA DE EPIC GAMES ---
             if (juego.epicStoreId) {
                 let epicPriceHTML = '';
                 if (juego.epicPrice === 0) {
@@ -119,6 +113,7 @@ async function cargarDetallesDelJuego(gameId) {
                 } else {
                     epicPriceHTML = `<h5 class="mb-0 text-info fw-bold">USD ${juego.epicFinalPrice.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</h5>`;
                 }
+                const epicIdentifier = juego.pageSlug ? juego.pageSlug : (juego.epicStoreId);
 
                 pricesContainer.innerHTML += `
                     <div class="p-3 rounded border border-secondary bg-black bg-opacity-50 d-flex flex-column justify-content-between shadow-sm" style="min-width: 210px; backdrop-filter: blur(5px);">
@@ -129,15 +124,13 @@ async function cargarDetallesDelJuego(gameId) {
                         <div class="mb-3">
                             ${epicPriceHTML}
                         </div>
-                        <a href="https://store.epicgames.com/p/${juego.epicStoreId}" target="_blank" class="btn btn-sm btn-outline-info mt-auto fw-bold">
+                        <a href="https://store.epicgames.com/p/${epicIdentifier}" target="_blank" class="btn btn-sm btn-outline-info mt-auto fw-bold">
                             Ver en la tienda <i class="bi bi-box-arrow-up-right ms-1"></i>
                         </a>
                     </div>
                 `;
             }
         }
-
-        // 3. Descripción, Géneros y Categorías
         document.getElementById('game-description').textContent = juego.shortDescription || 'Sin descripción disponible para este título.';
 
         const genresContainer = document.getElementById('game-genres');
