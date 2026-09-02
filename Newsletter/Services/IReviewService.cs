@@ -10,6 +10,6 @@ namespace Newsletter.Services
         Task<(bool Success, string ErrorMessage, Review? Review)> CreateReviewAsync(ReviewCreateDto dto, string userId);
         Task<bool> DeleteReviewAsync(Guid id, string userId, bool isAdmin, bool isModerator);
         Task<Review> UpdateReviewAsync(Guid id, ReviewUpdateDto dto, string userId);
-        Task<Review> HideReview(Guid id, bool state, bool isAdmin, bool isModerator);
+        Task<Review> HideReviewAsync(Guid id, bool state, bool isAdmin, bool isModerator);
     }
 }

@@ -1,6 +1,8 @@
-﻿using MailKit.Net.Smtp;
+﻿using MailKit;
+using MailKit.Net.Smtp;
 using MailKit.Security;
 using MimeKit;
+using MimeKit.Utils;
 
 namespace Newsletter.Services
 {
@@ -21,31 +23,36 @@ namespace Newsletter.Services
 
             var message = new MimeMessage();
             message.From.Add(new MailboxAddress(senderName, senderEmail));
-            message.To.Add(new MailboxAddress("", toEmail));
+            message.To.Add(new MailboxAddress("Usuario de MCGames", toEmail));
             message.Subject = "Confirma tu cuenta en MCGames";
+            message.MessageId = MimeUtils.GenerateMessageId("mcgames.com.ar");
             //{confirmationLink}
             var bodyBuilder = new BodyBuilder
             {
-                TextBody = "Un texto de prueba"
-               /* HtmlBody = $@"
-                    <div style='background-color: #101218; color:#ffffff; padding: 30px; font-family: Arial, sans-serif; border-radius: 12px; max-width: 600px; margin: auto; border: 1px solid #2d2f38;'> >
-                        <h2 style='color: #0b57d0; text-align: center;'>¡Bienvenido a MCGames!</h2>
-                        <p style ='Color: #c4c7c5; font-size 1rem;'>Gracias por registrarte. Para activar tu cuenta y acceder a todas las funciones de la plataforma, por favor confirmá tu correo elentrónico haciendo clic en el siguiente botón:</p>
-                        <div style = 'text-align: center; margin: 35px 0;'>
-                        <a href='hola' style='background-color: #0b57d0; color: white; padding: 14px 28px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 1rem; display: inline-block;'>
-                        Confirmar mi correo
-                        </a>
-                        </div>
-                        <p style='font-size: 0.85rem; color: #80858c; text-align: center;'> Si no creaste esta cuenta en MCGames, simplemente ignorá este mensaje.</p>
-                    </div>",
-                TextBody = $"¡Bienvenido a MCGames! Gracias por registrarte. Para activar tu cuenta, por favor ingresa a este enlace: {confirmationLink} . Si no creaste esta cuenta, simplemente ignora este mensaje."
-               */
 
+                 HtmlBody = $@"
+                     <div style='background-color: #101218; color:#ffffff; padding: 30px; font-family: Arial, sans-serif; border-radius: 12px; max-width: 600px; margin: auto; border: 1px solid #2d2f38;'> >
+                         <h2 style='color: #0b57d0; text-align: center;'>¡Bienvenido a MCGames!</h2>
+                         <p style ='Color: #c4c7c5; font-size 1rem;'>Gracias por registrarte. Para activar tu cuenta y acceder a todas las funciones de la plataforma, por favor confirmá tu correo elentrónico haciendo clic en el siguiente botón:</p>
+                         <div style = 'text-align: center; margin: 35px 0;'>
+                         <a href='hola' style='background-color: #0b57d0; color: white; padding: 14px 28px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 1rem; display: inline-block;'>
+                         Confirmar mi correo
+                         </a>
+                         </div>
+                         <p style='font-size: 0.85rem; color: #80858c; text-align: center;'> Si no creaste esta cuenta en MCGames, simplemente ignorá este mensaje.</p>
+                     </div>",
             };
+                 /*TextBody = $"¡Bienvenido a MCGames! Gracias por registrarte. Para activar tu cuenta, por favor ingresa a este enlace: {confirmationLink} . Si no creaste esta cuenta, simplemente ignora este mensaje."
+                */
+
 
             message.Body = bodyBuilder.ToMessageBody();
-            
-            using var client = new SmtpClient();
+
+            // using var client = new SmtpClient();
+            var logPath = Path.Combine(
+     AppContext.BaseDirectory,
+     "smtp.log");
+            using var client = new SmtpClient(new ProtocolLogger("smtp.log"));
             await client.ConnectAsync(smtpServer, smtpPort, SecureSocketOptions.SslOnConnect);
             await client.AuthenticateAsync(senderEmail, password);
             await client.SendAsync(message);

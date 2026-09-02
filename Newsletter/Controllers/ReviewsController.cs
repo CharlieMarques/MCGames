@@ -104,7 +104,7 @@ namespace Newsletter.Controllers
             bool isModerator = User.IsInRole("Moderator");
             try
             {
-                var review = await _service.HideReview(id, state, isAdmin, isModerator);
+                var review = await _service.HideReviewAsync(id, state, isAdmin, isModerator);
                 return Ok(review);
             }
             catch (KeyNotFoundException ex)

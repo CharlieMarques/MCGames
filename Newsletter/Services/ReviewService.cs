@@ -94,14 +94,14 @@ namespace Newsletter.Services
             await _repository.SaveChangesAsync();
             return review;
         }
-        public async Task<Review> HideReview(Guid id, bool state, bool isAdmin, bool isModerator)
+        public async Task<Review> HideReviewAsync(Guid id, bool state, bool isAdmin, bool isModerator)
         {
             var review = await _repository.GetByIdAsync(id);
             if (review == null)
             {
                 throw new KeyNotFoundException("Reseña no encontrada");
             }
-            if (!isAdmin || !isModerator)
+            if (!isAdmin && !isModerator)
             {
                 throw new UnauthorizedAccessException("No tienes permiso para editar esta reseña");
             }
