@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity.Pages;
@@ -31,7 +32,7 @@ namespace Newsletter.Controllers
             var result = await _userService.RegisterAsync(dto);
             if (result.success)
             {
-                return Ok("Usuario creado con éxito");
+                return Ok("Usuario creado. Revisá tu correo para confirmar la cuenta.");
             }
             return BadRequest(result.Errors);
      
@@ -42,6 +43,10 @@ namespace Newsletter.Controllers
         {
             var result = await _userService.LoginAsync(dto);
 
+            if (result.EmailNotConfirmed)
+            {
+                return StatusCode(StatusCodes.Status403Forbidden, result.ErrorMessage);
+            }
             if(!result.success)
             {
                 return BadRequest(result.ErrorMessage);
@@ -64,6 +69,14 @@ namespace Newsletter.Controllers
             return BadRequest( result.message);
         }
 
+        [HttpPost("ResendConfirmation")]
+        [EnableRateLimiting("EmailSending")]
+        public async Task<IActionResult> ResendConfirmation(ResendConfirmationDto dto)
+        {
+            await _userService.ResendConfirmationEmailAsync(dto.Email);
+            return Ok("Si el email está registrado y sin confirmar, te enviamos un nuevo enlace.");
+        }
+
         
        [Authorize(Roles = "Admin")]
         [HttpPost("AssignRole")]
@@ -77,5 +90,22 @@ namespace Newsletter.Controllers
             }
             return BadRequest(result.Errors);
         }       
+
+        [HttpPost("ForgotPassword")]
+        [EnableRateLimiting("EmailSending")]
+        public async Task<IActionResult> ForgotPassword(ForgotPasswordDto dto)
+        {
+            await _userService.ForgotPasswordAsync(dto.Email);
+            return Ok("Si el email está registrado, te enviamos un enlace para restablecer tu contraseña.");
+        }
+
+        [HttpPost("ResetPassword")]
+        public async Task<IActionResult> ResetPassword(ResetPasswordDto dto)
+        {
+            var result = await _userService.ResetPasswordAsync(dto);
+            if (result.success)
+                return Ok("Tu contraseña se cambió correctamente. Ya podés iniciar sesión.");
+            return BadRequest(new { invalidLink = result.InvalidLink, errors = result.Errors });
+        }
     }
 }

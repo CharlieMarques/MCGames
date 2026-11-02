@@ -2,7 +2,6 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Newsletter.Data;
-using Newsletter.DTOs.SteamDto;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,7 +10,7 @@ using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Newsletter.Services
+namespace Newsletter.Integrations.Steam
 {
     public class SteamCronService : BackgroundService
     {
@@ -137,7 +136,7 @@ namespace Newsletter.Services
                                     if (dataElement.ValueKind == JsonValueKind.Object)
                                     {
                                         // Como confirmamos que es un objeto, lo deserializamos de forma 100% segura
-                                        var data = JsonSerializer.Deserialize<Newsletter.DTOs.SteamDto.SteamGameData>(dataElement.GetRawText(), options);
+                                        var data = JsonSerializer.Deserialize<SteamGameData>(dataElement.GetRawText(), options);
 
                                         if (data != null)
                                         {

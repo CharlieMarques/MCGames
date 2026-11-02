@@ -1,5 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
     const registerForm = document.getElementById('registerForm');
+    const loginForm = document.getElementById('loginForm');
     
     if (registerForm) {
         registerForm.addEventListener('submit', handleRegister);
@@ -55,7 +56,7 @@ async function handleRegister(event) {
             throw new Error(errorText || "Ocurrió un error en el servidor");
         }
 
-        alert("¡Cuenta creada con éxito! Ahora puedes iniciar sesión.");
+        alert("¡Cuenta creada! Te enviamos un email para confirmarla. Revisá tu bandeja de entrada (y la carpeta de spam).");
         window.location.href = 'login.html';
 
     } catch (error) {
@@ -97,6 +98,11 @@ async function handleLogin(event) {
 
         if (!response.ok) {
             const errorText = await response.text();
+            if (response.status === 403) {
+                // Email sin confirmar: mostramos el mensaje con el link para reenviarlo.
+                mostrarErrorConReenvio(errorText);
+                return;
+            }
             throw new Error(errorText || "Usuario o contraseña incorrectos.");
         }
 
@@ -118,5 +124,16 @@ async function handleLogin(event) {
 function mostrarError(mensaje) {
     const errorDiv = document.getElementById('error-message');
     errorDiv.textContent = mensaje;
+    errorDiv.classList.remove('d-none');
+}
+
+function mostrarErrorConReenvio(mensaje) {
+    const errorDiv = document.getElementById('error-message');
+    errorDiv.textContent = (mensaje || 'Tenés que confirmar tu email antes de iniciar sesión.') + ' ';
+    const link = document.createElement('a');
+    link.href = 'ConfirmarEmail.html?reenviar=1';
+    link.className = 'alert-link';
+    link.textContent = 'Reenviar email de confirmación';
+    errorDiv.appendChild(link);
     errorDiv.classList.remove('d-none');
 }

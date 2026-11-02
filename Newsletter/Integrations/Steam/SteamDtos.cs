@@ -1,7 +1,7 @@
 ﻿using System.Text.Json;
 using System.Text.Json.Serialization;
 
-namespace Newsletter.DTOs.SteamDto
+namespace Newsletter.Integrations.Steam
 {
     public class SteamGameWrapper
     {
@@ -21,11 +21,13 @@ namespace Newsletter.DTOs.SteamDto
         [JsonPropertyName("platforms")] public SteamPlatformsDto Platforms { get; set; }
         [JsonPropertyName("categories")] public List<SteamCategoryDto> Categories { get; set; }
         [JsonPropertyName("is_free")] public bool IsFree { get; set; }
+        [JsonPropertyName("type")] public string? Type { get; set; }
     }
 
     public class SteamReleaseDate
     {
         [JsonPropertyName("date")] public string Date { get; set; }
+        [JsonPropertyName("coming_soon")] public bool ComingSoon { get; set; }
     }
 
     public class SteamPriceOverview
@@ -76,5 +78,11 @@ namespace Newsletter.DTOs.SteamDto
     {
         [JsonPropertyName("appid")]
         public int AppId { get; set; }
+
+        [JsonPropertyName("name")]
+        public string Name { get; set; } = string.Empty;
+
+        [JsonPropertyName("last_modified")]
+        public long LastModified { get; set; }
     }
 }

@@ -22,6 +22,25 @@ namespace Newsletter.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
+            modelBuilder.Entity("Microsoft.AspNetCore.DataProtection.EntityFrameworkCore.DataProtectionKey", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("FriendlyName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Xml")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("DataProtectionKeys");
+                });
+
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
                 {
                     b.Property<string>("Id")
@@ -189,6 +208,9 @@ namespace Newsletter.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<DateTime?>("LastPriceCheck")
+                        .HasColumnType("datetime2");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(100)
@@ -247,6 +269,42 @@ namespace Newsletter.Migrations
                     b.HasIndex("GenreId");
 
                     b.ToTable("GameGenre");
+                });
+
+            modelBuilder.Entity("Newsletter.Models.GameInEpic", b =>
+                {
+                    b.Property<Guid>("GameId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("GameId");
+
+                    b.Property<string>("EpicStoreId")
+                        .HasColumnType("nvarchar(450)")
+                        .HasColumnName("EpicStoreId");
+
+                    b.Property<int>("EpicDiscountPercentage")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("EpicFinalPrice")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<bool>("EpicOnOffer")
+                        .HasColumnType("bit");
+
+                    b.Property<decimal>("EpicPrice")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<DateTime?>("LastPriceCheck")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("PageSlug")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("GameId", "EpicStoreId");
+
+                    b.HasIndex("GameId")
+                        .IsUnique();
+
+                    b.ToTable("GamesInEpic", (string)null);
                 });
 
             modelBuilder.Entity("Newsletter.Models.GameLibrary", b =>
@@ -394,6 +452,19 @@ namespace Newsletter.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("Reviews");
+                });
+
+            modelBuilder.Entity("Newsletter.Models.SteamSyncState", b =>
+                {
+                    b.Property<int>("Id")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("LastRunUtc")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("SteamSyncStates");
                 });
 
             modelBuilder.Entity("Newsletter.Models.User", b =>
@@ -575,6 +646,17 @@ namespace Newsletter.Migrations
                     b.Navigation("Genre");
                 });
 
+            modelBuilder.Entity("Newsletter.Models.GameInEpic", b =>
+                {
+                    b.HasOne("Newsletter.Models.Game", "Game")
+                        .WithOne("EpicData")
+                        .HasForeignKey("Newsletter.Models.GameInEpic", "GameId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Game");
+                });
+
             modelBuilder.Entity("Newsletter.Models.GameLibrary", b =>
                 {
                     b.HasOne("Newsletter.Models.Game", "Game")
@@ -659,6 +741,8 @@ namespace Newsletter.Migrations
 
             modelBuilder.Entity("Newsletter.Models.Game", b =>
                 {
+                    b.Navigation("EpicData");
+
                     b.Navigation("GameCategories");
 
                     b.Navigation("GameGenre");

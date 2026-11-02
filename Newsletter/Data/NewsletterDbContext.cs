@@ -1,10 +1,11 @@
 ﻿using Newsletter.Models;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.DataProtection.EntityFrameworkCore;
 
 namespace Newsletter.Data
 {
-    public class NewsletterDbContext : IdentityDbContext<User>
+    public class NewsletterDbContext : IdentityDbContext<User>, IDataProtectionKeyContext
     {
         public NewsletterDbContext(DbContextOptions<NewsletterDbContext> options) : base(options) { }
         public DbSet<Game> Games { get; set; }
@@ -16,6 +17,8 @@ namespace Newsletter.Data
         public DbSet<GamePlatform> GamePlatforms { get; set; }
         public DbSet<GameGenre> GameGenre { get; set; }
         public virtual DbSet<GameInEpic> GamesInEpic { get; set; }
+        public DbSet<SteamSyncState> SteamSyncStates { get; set; }
+        public DbSet<DataProtectionKey> DataProtectionKeys { get; set; } = null!;
 
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -70,6 +73,10 @@ namespace Newsletter.Data
                       .HasForeignKey<GameInEpic>(d => d.GameId) 
                       .OnDelete(DeleteBehavior.Cascade);
             });
+
+            modelBuilder.Entity<SteamSyncState>()
+                .Property(s => s.Id)
+                .ValueGeneratedNever();
         }
     }
 }

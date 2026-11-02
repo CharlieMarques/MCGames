@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- El link trae un token en la URL: que no viaje a otros sitios en el encabezado Referer. -->
+    <meta name="referrer" content="no-referrer">
+    <title>Recuperar contraseña - MCGames</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="icon" type="image/svg+xml" href="../assets/icons/Logo.svg">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body class="d-flex align-items-center py-4" style="min-height: 100vh;">
+
+    <main class="w-100 m-auto" style="max-width: 450px;">
+        <div class="card shadow-lg border-0" style="background-color: var(--bg-secondary); border-radius: 1rem;">
+            <div class="card-body p-5 text-light">
+
+                <div class="text-center mb-4">
+                    <i class="bi bi-key fs-1" style="color: var(--accent-secondary);"></i>
+                    <h2 class="fw-bold mt-2">Recuperar contraseña</h2>
+                </div>
+
+                <!-- Modo 1: pedir el link -->
+                <div id="estado-pedir" class="d-none">
+                    <div id="mensaje-pedir" class="alert alert-info" role="alert">
+                        Ingresá el email de tu cuenta y te mandamos un enlace para elegir una nueva contraseña.
+                    </div>
+                    <form id="forgotForm">
+                        <div class="mb-3">
+                            <label for="forgotEmail" class="form-label text-light">Correo electrónico</label>
+                            <input type="email" class="form-control bg-dark border-secondary text-light" id="forgotEmail" required placeholder="tu@email.com">
+                        </div>
+                        <button class="btn btn-accent w-100 py-2 fw-bold" type="submit" id="btnForgot">Enviar enlace</button>
+                    </form>
+                    <div id="forgot-result" class="alert mt-3 d-none" role="alert"></div>
+                </div>
+
+                <!-- Modo 2: elegir la nueva contraseña (se abre desde el link del email) -->
+                <div id="estado-nueva" class="d-none">
+                    <form id="resetForm">
+                        <div class="mb-3">
+                            <label for="newPassword" class="form-label text-light">Nueva contraseña</label>
+                            <input type="password" class="form-control bg-dark border-secondary text-light" id="newPassword" required minlength="6" placeholder="••••••••">
+                        </div>
+                        <div class="mb-4">
+                            <label for="confirmPassword" class="form-label text-light">Confirmar nueva contraseña</label>
+                            <input type="password" class="form-control bg-dark border-secondary text-light" id="confirmPassword" required minlength="6" placeholder="••••••••">
+                        </div>
+                        <button class="btn btn-accent w-100 py-2 fw-bold" type="submit" id="btnReset">Guardar contraseña</button>
+                    </form>
+                    <div id="reset-errors" class="alert alert-danger mt-3 d-none" role="alert"></div>
+                    <button id="btnPedirOtro" class="btn btn-outline-light w-100 mt-3 d-none" type="button">Pedir un nuevo enlace</button>
+                </div>
+
+                <!-- Contraseña cambiada -->
+                <div id="estado-exito" class="d-none">
+                    <div id="mensaje-exito" class="alert alert-success" role="alert"></div>
+                    <a href="login.html" class="btn btn-accent w-100 py-2 fw-bold">Iniciar sesión</a>
+                </div>
+
+                <div class="text-center mt-3">
+                    <a href="login.html" class="text-decoration-none fw-bold" style="color: var(--accent-primary);">Volver a iniciar sesión</a>
+                </div>
+
+            </div>
+        </div>
+    </main>
+
+    <script src="../js/config/api.js"></script>
+    <script src="../js/recuperar-contrasena.js"></script>
+</body>
+</html>
